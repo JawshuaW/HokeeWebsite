@@ -52,13 +52,17 @@
                     <span class="status-label">Reports Completed</span>
                     <span id="paragraphs-completed" class="status-value">0</span>
                 </div>
-                <div class="status-block">
+                <div class="status-block" id="strikes-status">
                     <span class="status-label">Strikes</span>
                     <div id="strike-track" class="strike-track" aria-label="Strikes taken">
                         <span class="strike-slot" data-slot="1"></span>
                         <span class="strike-slot" data-slot="2"></span>
                         <span class="strike-slot" data-slot="3"></span>
                     </div>
+                </div>
+                <div class="status-block" id="reserve-status">
+                    <span class="status-label">Reserve Lives</span>
+                    <span id="reserve-count" class="status-value">0</span>
                 </div>
                 <div class="status-block">
                     <span class="status-label">Courier Speed</span>
@@ -142,6 +146,15 @@
                 </table>
             </div>
 
+            <div class="achievements-panel">
+                <div class="achievements-header">
+                    <h2>Escape Achievements</h2>
+                    <button id="reset-achievements" type="button">Reset Achievements</button>
+                </div>
+                <p class="achievements-intro">Complete daring feats to earn decorations. Achievements are saved in your browser.</p>
+                <ul id="achievements-list" class="achievements-list" aria-live="polite"></ul>
+            </div>
+
             <div class="controls">
                 <button id="restart-button" type="button">Request Reinforcements</button>
             </div>
@@ -213,7 +226,12 @@
                     prompts: [
                         "A sympathetic nurse slides you a smuggled typewriter and whispers that the escape tunnel will open at midnight if your report looks official.",
                         "You detail fake orders rerouting the guard patrol, praying every keystroke convinces the Kommandant.",
-                        "Each word you type buys your squad more time to cut through the cellar bars beneath the barracks."
+                        "Each word you type buys your squad more time to cut through the cellar bars beneath the barracks.",
+                        "Moonlight spills through the bars as you forge a supply request promising extra rations for the guards on duty.",
+                        "You mimic the clerk's clipped tone, authorizing a late-night roll call that will draw soldiers away from the tunnel.",
+                        "Sweat beads on your brow while you describe a forged inspection that orders everyone to assemble in the courtyard.",
+                        "You draft a message blaming missing uniforms on a phantom audit, hoping the quartermaster signs without question.",
+                        "You quietly mention a visiting colonel in your report, knowing the guards will scramble to prepare formalities."
                     ]
                 },
                 medium: {
@@ -225,7 +243,12 @@
                         "The tunnel diggers wait for your cue; you describe a phony medical quarantine that will seal off the infirmary corridor.",
                         "Shellfire rattles the windows as you encode coordinates for a non-existent inspection that should lure the guards away.",
                         "You fold in rumors about Allied advances, padding your report with enough fear to earn an evacuation order.",
-                        "Your bunkmate stands lookout as you assign the night shift to a guard already detained for questioning."
+                        "Your bunkmate stands lookout as you assign the night shift to a guard already detained for questioning.",
+                        "You list imaginary fuel leaks that will seal the motor pool and thin the night patrol.",
+                        "You lace the dispatch with counterfeit signatures so convincing the adjutant will never question them.",
+                        "You recount a fake escape attempt to justify doubling the guards along the western wall while the tunnelers work east.",
+                        "You cite forged telegrams demanding all radios be inspected at once, leaving the barracks eerily quiet.",
+                        "You reference a made-up inspection team whose sudden arrival should send the garrison scrambling."
                     ]
                 },
                 hard: {
@@ -239,7 +262,12 @@
                         "Every keystroke echoes in the silent barracks while you imitate the colonel's clipped cadence to request emergency transport vehicles.",
                         "You embed subtle code phrases in the margins, assuring the resistance that the east fence will be unguarded after roll call.",
                         "The typewriter ribbon begins to fray, yet you outline a supply shortage severe enough to justify unlocking the armory.",
-                        "Mortars thud in the distance as you finalize evacuation manifests that will put every guard on the road by nightfall."
+                        "Mortars thud in the distance as you finalize evacuation manifests that will put every guard on the road by nightfall.",
+                        "You describe a counterfeit firing squad rehearsal that will empty the courtyard precisely when you plan to run.",
+                        "You weave in fake engineering diagrams proving the northern wall is unsafe, forcing the guards to retreat inside.",
+                        "You compose a meticulous manifest rerouting every prisoner for 'classification', hiding your squad among the names.",
+                        "You draft a brazen order stripping the armoury for transport, knowing the sentries will argue long enough for you to vanish.",
+                        "You lace the final paragraph with coded assurances that the getaway truck will be waiting beyond the gate."
                     ]
                 }
             };
@@ -289,9 +317,33 @@
             const clearLeaderboardButton = document.getElementById('clear-leaderboard');
             const soundtrackFrame = document.getElementById('battle-hymn');
             const difficultyButtons = document.querySelectorAll('.difficulty-option');
+            const reserveDisplay = document.getElementById('reserve-count');
+            const achievementsList = document.getElementById('achievements-list');
+            const resetAchievementsButton = document.getElementById('reset-achievements');
+            const strikesStatus = document.getElementById('strikes-status');
+            const reserveStatus = document.getElementById('reserve-status');
             let pendingDifficulty = 'easy';
 
             const MAX_LEADERBOARD = 10;
+            const MAX_RESERVE_LIVES = 3;
+
+            const ACHIEVEMENTS = [
+                { id: 'first-report', name: 'Ink on the Keys', description: 'Deliver your first forged report.' },
+                { id: 'flawless-report', name: 'Ghost Writer', description: 'Complete a report without a mistake.' },
+                { id: 'reserve-earned', name: 'Hidden Ally', description: 'Earn a reserve life for perfect typing.' },
+                { id: 'reserve-spent', name: 'Last Gasp', description: 'Spend a reserve life to survive a strike.' },
+                { id: 'speed-ace', name: 'Lightning Courier', description: 'Finish an escape with at least 80 WPM.' },
+                { id: 'accuracy-ace', name: 'Iron Quill', description: 'Finish an escape with at least 99% accuracy.' },
+                { id: 'zero-mistakes', name: 'Untouchable', description: 'Escape without making a single mistake.' },
+                { id: 'hard-victory', name: 'Impossible Escape', description: 'Win on the Impossible Route.' },
+                { id: 'comeback', name: 'Steel Nerves', description: 'Escape after reaching two strikes.' },
+                { id: 'streak-master', name: 'Silent Typist', description: 'Reach a flawless streak of 150 keys.' }
+            ];
+            const ACHIEVEMENT_STORAGE_KEY = 'typingThunderAchievements';
+            const achievementMap = new Map(ACHIEVEMENTS.map((achievement) => [achievement.id, achievement]));
+            const achievementState = {
+                unlocked: new Set()
+            };
 
             const state = {
                 playerName: '',
@@ -299,6 +351,7 @@
                 roundGoal: 0,
                 roundIndex: 0,
                 strikes: 0,
+                reserveLives: 0,
                 paragraphsDelivered: 0,
                 totalCorrectChars: 0,
                 mistakes: 0,
@@ -313,7 +366,9 @@
                 lockedValue: '',
                 currentStreak: 0,
                 longestStreak: 0,
-                lastMatchLength: 0
+                lastMatchLength: 0,
+                roundStrikes: 0,
+                highestStrikes: 0
             };
 
             let soundtrackUnlocked = false;
@@ -362,6 +417,7 @@
                     candidate = pool[Math.floor(Math.random() * pool.length)];
                     safety += 1;
                 } while (state.usedParagraphs.includes(candidate) && safety < 20);
+                candidate = typeof candidate === 'string' ? candidate.trim() : '';
                 state.usedParagraphs.push(candidate);
                 return candidate;
             }
@@ -398,6 +454,118 @@
                 });
             }
 
+            function updateReserveDisplay() {
+                if (reserveDisplay) {
+                    reserveDisplay.textContent = state.reserveLives;
+                }
+            }
+
+            function flashStatus(element) {
+                if (!element) {
+                    return;
+                }
+                element.classList.remove('pulse');
+                void element.offsetWidth;
+                element.classList.add('pulse');
+                setTimeout(() => element.classList.remove('pulse'), 600);
+            }
+
+            function loadAchievementState() {
+                try {
+                    const stored = localStorage.getItem(ACHIEVEMENT_STORAGE_KEY);
+                    if (!stored) {
+                        achievementState.unlocked = new Set();
+                        return;
+                    }
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        achievementState.unlocked = new Set(parsed);
+                    }
+                } catch (error) {
+                    console.error('Failed to read achievements', error);
+                    achievementState.unlocked = new Set();
+                }
+            }
+
+            function persistAchievements() {
+                try {
+                    localStorage.setItem(ACHIEVEMENT_STORAGE_KEY, JSON.stringify([...achievementState.unlocked]));
+                } catch (error) {
+                    console.error('Failed to persist achievements', error);
+                }
+            }
+
+            function renderAchievements() {
+                if (!achievementsList) {
+                    return;
+                }
+                achievementsList.innerHTML = '';
+                ACHIEVEMENTS.forEach((achievement) => {
+                    const unlocked = achievementState.unlocked.has(achievement.id);
+                    const item = document.createElement('li');
+                    item.className = `achievement ${unlocked ? 'unlocked' : 'locked'}`;
+                    item.setAttribute('data-achievement', achievement.id);
+                    item.innerHTML = `
+                        <div class="achievement-header">
+                            <span class="achievement-name">${achievement.name}</span>
+                            <span class="achievement-status" aria-hidden="true">${unlocked ? '★' : '✖'}</span>
+                        </div>
+                        <p class="achievement-desc">${achievement.description}</p>
+                    `;
+                    if (unlocked) {
+                        item.setAttribute('aria-label', `${achievement.name} unlocked: ${achievement.description}`);
+                    } else {
+                        item.setAttribute('aria-label', `${achievement.name} locked: ${achievement.description}`);
+                    }
+                    achievementsList.appendChild(item);
+                });
+            }
+
+            function unlockAchievement(id) {
+                if (!achievementMap.has(id) || achievementState.unlocked.has(id)) {
+                    return;
+                }
+                achievementState.unlocked.add(id);
+                persistAchievements();
+                renderAchievements();
+                const achievement = achievementMap.get(id);
+                logEvent(`Achievement unlocked: ${achievement.name}`, 'achievement');
+                if (state.gameActive) {
+                    setAnnouncement(`Achievement unlocked: ${achievement.name}!`, 'achievement');
+                }
+            }
+
+            function resetAchievements() {
+                achievementState.unlocked.clear();
+                persistAchievements();
+                renderAchievements();
+                logEvent('Achievement board wiped clean.', 'neutral');
+                setAnnouncement('Achievements reset. Begin anew.', 'info');
+            }
+
+            function evaluateRunAchievements({ victory, wpm, accuracy }) {
+                if (wpm >= 80) {
+                    unlockAchievement('speed-ace');
+                }
+                if (accuracy >= 99) {
+                    unlockAchievement('accuracy-ace');
+                }
+                if (state.longestStreak >= 150) {
+                    unlockAchievement('streak-master');
+                }
+                if (victory) {
+                    if (state.mistakes === 0) {
+                        unlockAchievement('zero-mistakes');
+                    }
+                    if (state.difficulty === 'hard') {
+                        unlockAchievement('hard-victory');
+                    }
+                    if (state.highestStrikes >= 2) {
+                        unlockAchievement('comeback');
+                    }
+                }
+            }
+
             function updateStats(currentMatchLength = state.lastMatchLength) {
                 const effectiveCorrect = state.totalCorrectChars + currentMatchLength;
                 const mistakes = state.mistakes;
@@ -412,6 +580,7 @@
                 streakDisplay.textContent = `${state.currentStreak} keys`;
                 bestStreakDisplay.textContent = `${state.longestStreak} keys`;
                 updateStrikeDisplay();
+                updateReserveDisplay();
             }
 
             function updateTimer() {
@@ -433,16 +602,18 @@
             }
 
             function setParagraph(text) {
-                state.activeParagraph = text;
+                const sanitized = typeof text === 'string' ? text.trimEnd() : '';
+                state.activeParagraph = sanitized;
                 typedPortion.textContent = '';
-                remainingPortion.textContent = text;
+                remainingPortion.textContent = sanitized;
                 typeInput.value = '';
                 typewriter.style.setProperty('--typed-length', 0);
                 typeInput.focus();
                 state.errorIndex = null;
                 state.lockedValue = '';
                 state.lastMatchLength = 0;
-                updateProgress(0, text.length);
+                state.roundStrikes = 0;
+                updateProgress(0, sanitized.length);
                 updateRoundBanner();
             }
 
@@ -467,16 +638,38 @@
             }
 
             function recordStrike(currentMatchLength = state.lastMatchLength) {
-                state.strikes += 1;
                 state.mistakes += 1;
+                state.roundStrikes += 1;
                 state.currentStreak = 0;
-                updateStats(currentMatchLength);
                 resetTypewriterAnimation();
                 typewriter.classList.add('shake');
-                logEvent('A guard narrows his eyes at the forged document.', 'danger');
-                if (state.strikes >= 3) {
-                    endGame(false);
+
+                let reserveConsumed = false;
+                if (state.reserveLives > 0) {
+                    state.reserveLives -= 1;
+                    reserveConsumed = true;
+                    flashStatus(reserveStatus);
+                    updateReserveDisplay();
+                    updateStrikeDisplay();
+                    logEvent('A hidden ally covers your slip before the guards react.', 'success');
+                    unlockAchievement('reserve-spent');
+                } else {
+                    state.strikes += 1;
+                    if (state.strikes > state.highestStrikes) {
+                        state.highestStrikes = state.strikes;
+                    }
+                    flashStatus(strikesStatus);
+                    updateStrikeDisplay();
+                    logEvent('A guard narrows his eyes at the forged document.', 'danger');
+                    if (state.strikes >= 3) {
+                        updateStats(currentMatchLength);
+                        endGame(false);
+                        return { reserveConsumed };
+                    }
                 }
+
+                updateStats(currentMatchLength);
+                return { reserveConsumed };
             }
 
             function completeReport(charsTyped) {
@@ -485,29 +678,71 @@
                 state.roundIndex += 1;
                 state.paragraphsDelivered = state.roundIndex;
                 state.currentStreak = 0;
+
+                const perfectRound = state.roundStrikes === 0;
                 const roundsLeft = Math.max(state.roundGoal - state.roundIndex, 0);
+
+                if (state.roundIndex === 1) {
+                    unlockAchievement('first-report');
+                }
+                if (perfectRound) {
+                    unlockAchievement('flawless-report');
+                }
+
+                let announcementMessage = 'Report accepted.';
+                let announcementTone = 'success';
+
+                if (state.roundStrikes > 0 && state.strikes > 0) {
+                    state.strikes = Math.max(0, state.strikes - 1);
+                    flashStatus(strikesStatus);
+                    updateStrikeDisplay();
+                    logEvent('Command buys your forged orders and rescinds one strike.', 'success');
+                    announcementMessage += ' Suspicion eased—one strike cleared.';
+                } else if (perfectRound && state.strikes === 0) {
+                    if (state.reserveLives < MAX_RESERVE_LIVES) {
+                        state.reserveLives += 1;
+                        flashStatus(reserveStatus);
+                        logEvent('Perfect delivery earns you a reserve life.', 'success');
+                        unlockAchievement('reserve-earned');
+                        announcementMessage += ' Perfect delivery grants you a reserve life.';
+                        announcementTone = 'victory';
+                    } else {
+                        logEvent('Perfect delivery. Reserve lives already at maximum readiness.', 'neutral');
+                    }
+                }
+
+                state.roundStrikes = 0;
+                updateReserveDisplay();
+                updateStrikeDisplay();
+                updateStats();
+
                 if (roundsLeft > 0) {
                     logEvent(`Report ${state.roundIndex} delivered. ${roundsLeft} more until the escape is ready.`, 'success');
+                    announcementMessage += ' Prepare the next forged order.';
                 } else {
-                    logEvent(`Final report delivered. The escape plan is complete!`, 'success');
+                    logEvent('Final report delivered. The escape plan is complete!', 'success');
                 }
-                updateStats();
+
                 if (state.roundIndex >= state.roundGoal) {
                     endGame(true);
-                    return;
+                    return null;
                 }
-                setParagraph(sampleParagraph());
+
+                const nextParagraph = sampleParagraph();
+                setParagraph(nextParagraph);
+                return { message: announcementMessage, tone: announcementTone };
             }
 
             function resetGameState(options = {}) {
                 const preserveDifficulty = Boolean(options.preserveDifficulty);
                 if (!preserveDifficulty) {
                     state.difficulty = null;
-                    state.roundGoal = 0;
+                state.roundGoal = 0;
                 }
                 state.roundIndex = 0;
                 state.paragraphsDelivered = 0;
                 state.strikes = 0;
+                state.reserveLives = 0;
                 state.totalCorrectChars = 0;
                 state.mistakes = 0;
                 state.keystrokes = 0;
@@ -525,6 +760,8 @@
                 state.currentStreak = 0;
                 state.longestStreak = 0;
                 state.lastMatchLength = 0;
+                state.roundStrikes = 0;
+                state.highestStrikes = 0;
                 missionClock.textContent = '00:00';
                 typedPortion.textContent = '';
                 remainingPortion.textContent = '';
@@ -535,6 +772,7 @@
                 updateStats();
                 updateTimer();
                 updateStrikeDisplay();
+                updateReserveDisplay();
                 typeInput.setAttribute('disabled', 'disabled');
                 roundsRemainingDisplay.textContent = state.roundGoal ? state.roundGoal : '—';
                 paragraphsCompleted.textContent = 0;
@@ -595,6 +833,8 @@
                 finalParagraphs.textContent = state.paragraphsDelivered;
                 finalDifficulty.textContent = difficultyNames[state.difficulty] || '—';
                 finalTime.textContent = timeLabel;
+
+                evaluateRunAchievements({ victory, wpm, accuracy });
 
                 const summary = {
                     name: state.playerName,
@@ -711,8 +951,13 @@
                     if (state.errorIndex === null) {
                         state.errorIndex = matchLength;
                         state.lockedValue = typed;
-                        recordStrike(matchLength);
-                        setAnnouncement('You mis-typed a letter! Backspace before the guard notices.', 'warning');
+                        const strikeResult = recordStrike(matchLength);
+                        if (state.gameActive) {
+                            const message = strikeResult && strikeResult.reserveConsumed
+                                ? 'A reserve life masked your mistake! Backspace immediately before suspicion returns.'
+                                : 'You mis-typed a letter! Backspace before the guard notices.';
+                            setAnnouncement(message, 'warning');
+                        }
                     } else {
                         if (typed.length <= state.errorIndex && expected.startsWith(typed)) {
                             state.errorIndex = null;
@@ -748,6 +993,9 @@
                     state.currentStreak += gained;
                     if (state.currentStreak > state.longestStreak) {
                         state.longestStreak = state.currentStreak;
+                        if (state.longestStreak >= 150) {
+                            unlockAchievement('streak-master');
+                        }
                     }
                 } else if (matchLength < state.lastMatchLength) {
                     state.currentStreak = matchLength;
@@ -758,9 +1006,9 @@
                 state.lockedValue = typed;
 
                 if (typed === expected) {
-                    completeReport(expected.length);
-                    if (state.gameActive) {
-                        setAnnouncement('Report accepted. Prepare the next forged order.', 'success');
+                    const outcome = completeReport(expected.length);
+                    if (state.gameActive && outcome && outcome.message) {
+                        setAnnouncement(outcome.message, outcome.tone || 'success');
                     }
                     state.lockedValue = '';
                     typewriter.classList.add('success');
@@ -900,6 +1148,9 @@
                 clearLeaderboard();
                 logEvent('Resistance archive wiped clean.', 'neutral');
             });
+            if (resetAchievementsButton) {
+                resetAchievementsButton.addEventListener('click', resetAchievements);
+            }
             document.addEventListener('click', () => {
                 if (state.gameActive) {
                     typeInput.focus();
@@ -911,9 +1162,12 @@
                 unmuteSoundtrack();
             }, { once: false });
 
+            loadAchievementState();
+            renderAchievements();
             renderLeaderboard(loadLeaderboard());
             updateStats();
             updateTimer();
+            updateReserveDisplay();
             playerNameInput.focus();
 
             function renderParagraph(matchLength, mismatch) {

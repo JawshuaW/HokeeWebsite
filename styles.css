@@ -108,6 +108,11 @@ main {
     box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
 }
 
+.status-block.pulse {
+    animation: statusPulse 0.6s ease;
+    box-shadow: 0 0 22px rgba(214, 190, 140, 0.45);
+}
+
 .status-label {
     display: block;
     font-size: 0.85rem;
@@ -141,6 +146,21 @@ main {
 .strike-slot.active {
     background: radial-gradient(circle, #c74c3c 25%, #661d18 75%);
     box-shadow: 0 0 18px rgba(167, 48, 40, 0.8);
+}
+
+@keyframes statusPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(214, 190, 140, 0);
+    }
+    50% {
+        transform: scale(1.03);
+        box-shadow: 0 0 26px rgba(214, 190, 140, 0.55);
+    }
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 rgba(214, 190, 140, 0);
+    }
 }
 
 .typewriter {
@@ -383,6 +403,10 @@ main {
     color: #ffb0a6;
 }
 
+#announcement.achievement {
+    color: #f6d57b;
+}
+
 .battle-log {
     margin: 0 auto 2.5rem;
     max-width: 680px;
@@ -430,6 +454,12 @@ main {
 
 #log-entries li.neutral {
     color: rgba(229, 222, 194, 0.85);
+}
+
+#log-entries li.achievement {
+    border-left-color: #f6d57b;
+    color: #ffe8ba;
+    box-shadow: 0 0 16px rgba(246, 213, 123, 0.2);
 }
 
 .leaderboard {
@@ -497,6 +527,103 @@ main {
 
 .leaderboard tbody td {
     color: rgba(233, 226, 199, 0.9);
+}
+
+.achievements-panel {
+    margin: 0 auto 3rem;
+    max-width: 920px;
+    background: rgba(16, 19, 24, 0.78);
+    border-radius: 20px;
+    border: 1px solid rgba(216, 197, 147, 0.25);
+    padding: 1.8rem;
+    box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+}
+
+.achievements-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.achievements-header h2 {
+    margin: 0;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-size: 1.15rem;
+}
+
+.achievements-intro {
+    margin: 0 0 1.5rem;
+    color: rgba(236, 225, 190, 0.75);
+    font-size: 0.95rem;
+}
+
+.achievements-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.achievement {
+    border-radius: 14px;
+    border-left: 4px solid rgba(216, 197, 147, 0.4);
+    background: rgba(14, 16, 20, 0.85);
+    padding: 1rem 1.1rem;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.achievement.unlocked {
+    border-left-color: #f6d57b;
+    background: rgba(64, 54, 30, 0.6);
+    box-shadow: 0 16px 24px rgba(0, 0, 0, 0.35), 0 0 22px rgba(246, 213, 123, 0.25);
+}
+
+.achievement.unlocked:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 26px rgba(0, 0, 0, 0.38), 0 0 26px rgba(246, 213, 123, 0.35);
+}
+
+.achievement.locked {
+    opacity: 0.55;
+}
+
+.achievement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+}
+
+.achievement-name {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: rgba(245, 237, 210, 0.95);
+}
+
+.achievement-status {
+    font-size: 1.2rem;
+    color: #f6d57b;
+}
+
+.achievement.locked .achievement-status {
+    color: rgba(214, 190, 140, 0.45);
+}
+
+.achievement-desc {
+    margin: 0;
+    color: rgba(222, 213, 184, 0.78);
+    font-size: 0.95rem;
+    line-height: 1.4;
 }
 
 button {
@@ -764,6 +891,14 @@ footer {
     .paragraph-display {
         font-size: 1.02rem;
     }
+
+    .achievements-panel {
+        padding: 1.5rem;
+    }
+
+    .achievements-list {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
 }
 
 @media (max-width: 540px) {
@@ -785,6 +920,10 @@ footer {
     }
 
     .final-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .achievements-list {
         grid-template-columns: 1fr;
     }
 }
