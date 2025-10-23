@@ -3,84 +3,569 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Hokee - Cherokee Medicine Man</title>
+    <title>Operation: Typing Thunder</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Include the Twitch Embed script -->
-    <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <header>
-        <!-- Navigation menu -->
-        <nav>
-            <ul>
-                <li><a href="#about">About</a></li>
-                <li><a href="#schedule">Schedule</a></li>
-                <li><a href="#donations">Donations</a></li>
-                <li><a href="#socials">Socials</a></li>
-                <li><a href="#livestream">Live Stream</a></li>
-            </ul>
-        </nav>
+    <img class="soldier-avatar" src="https://cdn.vectorstock.com/i/500p/37/74/german-soldier-cartoon-vector-25453774.jpg" alt="German field courier illustration">
+    <header class="hero">
+        <div class="hero-overlay">
+            <h1>Operation: Typing Thunder</h1>
+            <p>Berlin, 1945. Your typewriter is your lifeline—three strikes and the enemy firing squad ends the mission.</p>
+        </div>
     </header>
 
-    <!-- Livestream section -->
-    <section id="livestream">
-        <h2>Live Stream</h2>
-        <div id="twitch-embed"></div>
-    </section>
+    <main>
+        <section id="typing-arena" class="game-area">
+            <div id="player-setup" class="player-setup" role="dialog" aria-modal="true">
+                <div class="player-setup-card">
+                    <h2>Report for Duty</h2>
+                    <p>Enter your codename to join the Allied courier ranks and face the Battle Royale gauntlet.</p>
+                    <label for="player-name" class="visually-hidden">Codename</label>
+                    <input id="player-name" type="text" maxlength="20" placeholder="Callsign" autocomplete="off">
+                    <button id="start-mission" type="button">Deploy Courier</button>
+                </div>
+            </div>
 
-    <!-- Initialize the Twitch player -->
-    <script type="text/javascript">
-        new Twitch.Player("twitch-embed", {
-            channel: "hokeeshadowwalker",
-            width: "854",
-            height: "480",
-            parent: ["localhost"]
-        });
-    </script>
+            <div class="status-grid" aria-live="polite">
+                <div class="status-block">
+                    <span class="status-label">Codename</span>
+                    <span id="status-name" class="status-value">—</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Opponents Remaining</span>
+                    <span id="opponents-count" class="status-value">50</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Paragraphs Delivered</span>
+                    <span id="paragraphs-completed" class="status-value">0</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Strikes</span>
+                    <div id="strike-track" class="strike-track" aria-label="Strikes taken">
+                        <span class="strike-slot" data-slot="1"></span>
+                        <span class="strike-slot" data-slot="2"></span>
+                        <span class="strike-slot" data-slot="3"></span>
+                    </div>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Courier Speed</span>
+                    <span id="wpm" class="status-value">0 WPM</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Accuracy</span>
+                    <span id="accuracy" class="status-value">100%</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Mission Time</span>
+                    <span id="mission-clock" class="status-value">00:00</span>
+                </div>
+            </div>
 
-    <!-- About Hokee Section -->
-    <section id="about">
-        <h2>Hokee Shadowwalker</h2>
-        <div class="center-image">
-            <img src="hokeehead.png" alt="Hokee Head Image" class="hokee-head">
-        </div>
-        <h2>About Hokee</h2>
-        <p>Hok'ee Shadowwalker, born on April 17th, 1892, is a man shaped by hardship, resilience...</p>
-    </section>
+            <div class="typewriter" aria-live="assertive">
+                <div class="typewriter-body" id="typewriter">
+                    <div class="typewriter-paper">
+                        <div class="paper-header">Allied Dispatch • Berlin Sector</div>
+                        <div class="target-line">Current transmission:</div>
+                        <p id="paragraph-display" class="paragraph-display"><span id="typed-portion"></span><span id="remaining-portion"></span></p>
+                        <div class="hint-line">Remember: a single wrong letter counts as a strike.</div>
+                    </div>
+                    <div class="typewriter-platen"></div>
+                    <div class="typewriter-keys">
+                        <div class="key-row"><span>Q</span><span>W</span><span>E</span><span>R</span><span>T</span><span>Y</span><span>U</span><span>I</span><span>O</span><span>P</span></div>
+                        <div class="key-row"><span>A</span><span>S</span><span>D</span><span>F</span><span>G</span><span>H</span><span>J</span><span>K</span><span>L</span></div>
+                        <div class="key-row"><span>Z</span><span>X</span><span>C</span><span>V</span><span>B</span><span>N</span><span>M</span></div>
+                    </div>
+                    <textarea id="type-input" rows="4" autocomplete="off" spellcheck="false" aria-label="Type the Allied transmission" disabled></textarea>
+                </div>
+            </div>
 
-    <!-- Stream Schedule -->
-    <section id="schedule">
-        <h2>Stream Schedule</h2>
-        <ul>
-            <li>Monday: 6 PM - 9 PM</li>
-            <li>Wednesday: 6 PM - 9 PM</li>
-            <li>Friday: 6 PM - 9 PM</li>
-            <li>Saturday: 12 PM - 4 PM</li>
-        </ul>
-    </section>
+            <div id="announcement" role="status" aria-live="assertive"></div>
 
-    <!-- Donations Section -->
-    <section id="donations">
-        <h2>Support the Stream</h2>
-        <a href="https://yourdonationlink.com">
-            <img src="donations_button.png" alt="Donations Button">
-        </a>
-    </section>
+            <div class="battle-log">
+                <h2>Radio Log</h2>
+                <ul id="log-entries"></ul>
+            </div>
 
-    <!-- Socials Section -->
-    <section id="socials">
-        <h2>Connect with Hokee</h2>
-        <ul class="socials">
-            <a href="https://discordapp.com/users/141384806280724480"><img src="discord.png" alt="Discord"></a>
-        </ul>
-    </section>
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <h2>Global Courier Leaderboard</h2>
+                    <button id="clear-leaderboard" type="button">Clear Board</button>
+                </div>
+                <table aria-label="Global courier leaderboard">
+                    <thead>
+                        <tr>
+                            <th scope="col">Rank</th>
+                            <th scope="col">Codename</th>
+                            <th scope="col">WPM</th>
+                            <th scope="col">Accuracy</th>
+                            <th scope="col">Paragraphs</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
 
-    <!-- Footer -->
+            <div class="controls">
+                <button id="restart-button" type="button">Request Reinforcements</button>
+            </div>
+        </section>
+    </main>
+
     <footer>
-        <p>&copy; 2024 Hokee - Cherokee Medicine Man. All rights reserved.</p>
+        <p>&copy; 1945 Allied Command. Survive the night.</p>
     </footer>
 
+    <div id="game-over" class="game-over" aria-hidden="true">
+        <div class="game-over-content">
+            <h2 id="game-over-title">Mission Failed</h2>
+            <p id="game-over-message"></p>
+            <dl class="final-stats">
+                <div>
+                    <dt>WPM</dt>
+                    <dd id="final-wpm">0</dd>
+                </div>
+                <div>
+                    <dt>Accuracy</dt>
+                    <dd id="final-accuracy">0%</dd>
+                </div>
+                <div>
+                    <dt>Paragraphs Delivered</dt>
+                    <dd id="final-paragraphs">0</dd>
+                </div>
+                <div>
+                    <dt>Mission Time</dt>
+                    <dd id="final-time">00:00</dd>
+                </div>
+            </dl>
+            <button id="debrief-button" type="button">Return to Briefing</button>
+        </div>
+        <div class="game-over-blood"></div>
+        <div class="game-over-flash"></div>
+    </div>
+
+    <script>
+        (function () {
+            const paragraphs = [
+                "Through the shattered windows of the Reich Chancellery, the dawn leaks over Berlin while artillery thunders beyond the river.",
+                "Civilians clutch suitcases near the Brandenburg Gate, praying your dispatch reaches the front before the next bombardment.",
+                "Allied bombers roar above the Tiergarten, their silhouettes flashing like ghosts between the smoke-stained clouds.",
+                "The cobblestones of Unter den Linden glitter with rain and glass as resistance fighters whisper the passphrase to your ear.",
+                "You race past toppled statues and smoldering streetcars, feeling every heartbeat echo against the typewriter in your pack.",
+                "Inside a ruined café, a lone radio operator begs for coordinates while you hammer orders meant to turn the tide.",
+                "Searchlights sweep across the Spree, and the chill air tastes of cordite when a sniper round shatters the brick beside you.",
+                "Command promises reinforcements at Tempelhof if your fingers can outrun the hail of bullets and the weight of fear."
+            ];
+
+            const opponentsCount = document.getElementById('opponents-count');
+            const paragraphsCompleted = document.getElementById('paragraphs-completed');
+            const strikeTrack = document.getElementById('strike-track');
+            const wpmDisplay = document.getElementById('wpm');
+            const accuracyDisplay = document.getElementById('accuracy');
+            const missionClock = document.getElementById('mission-clock');
+            const typedPortion = document.getElementById('typed-portion');
+            const remainingPortion = document.getElementById('remaining-portion');
+            const announcement = document.getElementById('announcement');
+            const logEntries = document.getElementById('log-entries');
+            const typewriter = document.getElementById('typewriter');
+            const typeInput = document.getElementById('type-input');
+            const startButton = document.getElementById('start-mission');
+            const playerNameInput = document.getElementById('player-name');
+            const playerSetup = document.getElementById('player-setup');
+            const statusName = document.getElementById('status-name');
+            const restartButton = document.getElementById('restart-button');
+            const debriefButton = document.getElementById('debrief-button');
+            const gameOverPanel = document.getElementById('game-over');
+            const gameOverTitle = document.getElementById('game-over-title');
+            const gameOverMessage = document.getElementById('game-over-message');
+            const finalWpm = document.getElementById('final-wpm');
+            const finalAccuracy = document.getElementById('final-accuracy');
+            const finalParagraphs = document.getElementById('final-paragraphs');
+            const finalTime = document.getElementById('final-time');
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            const clearLeaderboardButton = document.getElementById('clear-leaderboard');
+
+            const MAX_LEADERBOARD = 10;
+
+            const state = {
+                playerName: '',
+                opponents: 50,
+                strikes: 0,
+                paragraphsDelivered: 0,
+                correctChars: 0,
+                totalChars: 0,
+                activeParagraph: '',
+                usedParagraphs: [],
+                startTime: null,
+                elapsedInterval: null,
+                gameActive: false
+            };
+
+            function sampleParagraph() {
+                if (state.usedParagraphs.length === paragraphs.length) {
+                    state.usedParagraphs = [];
+                }
+                let candidate;
+                do {
+                    candidate = paragraphs[Math.floor(Math.random() * paragraphs.length)];
+                } while (state.usedParagraphs.includes(candidate));
+                state.usedParagraphs.push(candidate);
+                return candidate;
+            }
+
+            function formatTime(ms) {
+                const totalSeconds = Math.floor(ms / 1000);
+                const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                return `${minutes}:${seconds}`;
+            }
+
+            function computeWpm(correctOverride) {
+                if (!state.startTime) {
+                    return 0;
+                }
+                const elapsedMinutes = Math.max((performance.now() - state.startTime) / 60000, 1 / 60);
+                const correct = typeof correctOverride === 'number' ? correctOverride : state.correctChars;
+                return (correct / 5) / elapsedMinutes;
+            }
+
+            function computeAccuracy(correctOverride, totalOverride) {
+                const correct = typeof correctOverride === 'number' ? correctOverride : state.correctChars;
+                const total = typeof totalOverride === 'number' ? totalOverride : state.totalChars;
+                if (total === 0) {
+                    return 100;
+                }
+                return (correct / total) * 100;
+            }
+
+            function updateStrikeDisplay() {
+                [...strikeTrack.children].forEach((slot, index) => {
+                    slot.classList.toggle('active', index < state.strikes);
+                });
+            }
+
+            function updateStats(liveCorrectDelta = 0, liveTotalDelta = 0) {
+                const effectiveCorrect = state.correctChars + liveCorrectDelta;
+                const effectiveTotal = state.totalChars + liveTotalDelta;
+                opponentsCount.textContent = state.opponents;
+                paragraphsCompleted.textContent = state.paragraphsDelivered;
+                wpmDisplay.textContent = `${computeWpm(effectiveCorrect).toFixed(1)} WPM`;
+                accuracyDisplay.textContent = `${computeAccuracy(effectiveCorrect, effectiveTotal).toFixed(1)}%`;
+                updateStrikeDisplay();
+            }
+
+            function updateTimer() {
+                if (!state.startTime) {
+                    missionClock.textContent = '00:00';
+                    return;
+                }
+                missionClock.textContent = formatTime(performance.now() - state.startTime);
+            }
+
+            function setParagraph(text) {
+                state.activeParagraph = text;
+                typedPortion.textContent = '';
+                remainingPortion.textContent = text;
+                typeInput.value = '';
+                typewriter.style.setProperty('--typed-length', 0);
+                typeInput.focus();
+            }
+
+            function logEvent(message, variant = 'neutral') {
+                const entry = document.createElement('li');
+                entry.textContent = message;
+                entry.className = variant;
+                logEntries.prepend(entry);
+                while (logEntries.children.length > 8) {
+                    logEntries.removeChild(logEntries.lastChild);
+                }
+            }
+
+            function setAnnouncement(message, variant) {
+                announcement.textContent = message;
+                announcement.className = variant;
+            }
+
+            function resetTypewriterAnimation() {
+                typewriter.classList.remove('shake');
+                void typewriter.offsetWidth;
+            }
+
+            function eliminateOpponents() {
+                const eliminated = Math.floor(Math.random() * 5) + 6; // 6-10 enemies per success
+                state.opponents = Math.max(0, state.opponents - eliminated);
+                state.paragraphsDelivered += 1;
+                logEvent(`Dispatch delivered! ${eliminated} rival couriers eliminated.`, 'success');
+                if (state.opponents === 0) {
+                    endGame(true);
+                } else {
+                    setParagraph(sampleParagraph());
+                }
+                updateStats();
+            }
+
+            function recordStrike(matchedBeforeError = 0) {
+                state.strikes += 1;
+                state.correctChars += matchedBeforeError;
+                state.totalChars += matchedBeforeError + 1;
+                updateStats();
+                resetTypewriterAnimation();
+                typewriter.classList.add('shake');
+                logEvent('Misfire! A wrong letter drew enemy fire.', 'danger');
+                if (state.strikes >= 3) {
+                    endGame(false);
+                } else {
+                    setParagraph(sampleParagraph());
+                }
+            }
+
+            function registerVictory(charsTyped) {
+                state.correctChars += charsTyped;
+                state.totalChars += charsTyped;
+                eliminateOpponents();
+            }
+
+            function resetGameState() {
+                state.opponents = 50;
+                state.strikes = 0;
+                state.paragraphsDelivered = 0;
+                state.correctChars = 0;
+                state.totalChars = 0;
+                state.activeParagraph = '';
+                state.usedParagraphs = [];
+                state.startTime = null;
+                if (state.elapsedInterval) {
+                    clearInterval(state.elapsedInterval);
+                    state.elapsedInterval = null;
+                }
+                state.gameActive = false;
+                missionClock.textContent = '00:00';
+                typedPortion.textContent = '';
+                remainingPortion.textContent = '';
+                announcement.textContent = '';
+                announcement.className = '';
+                logEntries.innerHTML = '';
+                updateStats();
+                updateTimer();
+                updateStrikeDisplay();
+                typeInput.setAttribute('disabled', 'disabled');
+            }
+
+            function startMission() {
+                const trimmedName = playerNameInput.value.trim();
+                if (!trimmedName) {
+                    playerNameInput.focus();
+                    return;
+                }
+                resetGameState();
+                state.playerName = trimmedName;
+                statusName.textContent = trimmedName;
+                playerSetup.classList.add('hidden');
+                typeInput.removeAttribute('disabled');
+                state.gameActive = true;
+                state.startTime = null;
+                setParagraph(sampleParagraph());
+                setAnnouncement('Orders received. Hold your ground and keep your accuracy sharp.', 'info');
+                logEvent('Courier deployed into the Berlin ruins.', 'neutral');
+                updateStats();
+                updateTimer();
+            }
+
+            function endGame(victory) {
+                state.gameActive = false;
+                typeInput.setAttribute('disabled', 'disabled');
+                if (state.elapsedInterval) {
+                    clearInterval(state.elapsedInterval);
+                    state.elapsedInterval = null;
+                }
+                const elapsed = state.startTime ? performance.now() - state.startTime : 0;
+                const wpm = computeWpm();
+                const accuracy = computeAccuracy();
+                const timeLabel = formatTime(elapsed);
+                finalWpm.textContent = wpm.toFixed(1);
+                finalAccuracy.textContent = `${accuracy.toFixed(1)}%`;
+                finalParagraphs.textContent = state.paragraphsDelivered;
+                finalTime.textContent = timeLabel;
+
+                const summary = {
+                    name: state.playerName,
+                    wpm: Number(wpm.toFixed(2)),
+                    accuracy: Number(accuracy.toFixed(2)),
+                    paragraphs: state.paragraphsDelivered,
+                    time: timeLabel,
+                    timestamp: Date.now()
+                };
+                updateLeaderboard(summary);
+
+                if (victory) {
+                    setAnnouncement('Victory! You outpaced every rival courier in Berlin.', 'victory');
+                    logEvent('Command salutes your flawless delivery.', 'success');
+                    gameOverTitle.textContent = 'Mission Accomplished';
+                    gameOverMessage.textContent = `All rival couriers neutralized. Berlin celebrates ${state.playerName}.`;
+                    gameOverPanel.classList.remove('fatal');
+                } else {
+                    setAnnouncement('You were executed after three strikes. The mission is lost.', 'defeat');
+                    logEvent('Enemy marksmen silence your post.', 'danger');
+                    gameOverTitle.textContent = 'Mission Failed';
+                    gameOverMessage.textContent = `A firing squad ends your run, ${state.playerName}. Your final stats are recorded.`;
+                    gameOverPanel.classList.add('fatal');
+                }
+
+                gameOverPanel.setAttribute('aria-hidden', 'false');
+                gameOverPanel.classList.add('visible');
+            }
+
+            function hideGameOver() {
+                gameOverPanel.classList.remove('visible');
+                gameOverPanel.setAttribute('aria-hidden', 'true');
+            }
+
+            function handleInput() {
+                if (!state.gameActive) {
+                    typeInput.value = '';
+                    return;
+                }
+                const typed = typeInput.value;
+                const expected = state.activeParagraph;
+                if (!state.startTime) {
+                    state.startTime = performance.now();
+                    if (!state.elapsedInterval) {
+                        state.elapsedInterval = setInterval(updateTimer, 250);
+                    }
+                }
+                const matchLength = (() => {
+                    const limit = Math.min(typed.length, expected.length);
+                    for (let i = 0; i < limit; i++) {
+                        if (typed[i] !== expected[i]) {
+                            return i;
+                        }
+                    }
+                    return limit;
+                })();
+
+                typedPortion.textContent = expected.slice(0, matchLength);
+                remainingPortion.textContent = expected.slice(matchLength);
+                typewriter.style.setProperty('--typed-length', matchLength);
+                updateStats(matchLength, matchLength);
+
+                if (typed.length > expected.length) {
+                    recordStrike(matchLength);
+                    return;
+                }
+
+                if (matchLength < typed.length) {
+                    recordStrike(matchLength);
+                    return;
+                }
+
+                if (typed === expected) {
+                    registerVictory(expected.length);
+                }
+            }
+
+            function handleRestart() {
+                hideGameOver();
+                resetGameState();
+                playerSetup.classList.remove('hidden');
+                playerNameInput.value = state.playerName;
+                playerNameInput.focus();
+            }
+
+            function loadLeaderboard() {
+                try {
+                    const stored = localStorage.getItem('typingThunderLeaderboard');
+                    if (!stored) {
+                        return [];
+                    }
+                    return JSON.parse(stored);
+                } catch (error) {
+                    console.error('Failed to read leaderboard', error);
+                    return [];
+                }
+            }
+
+            function persistLeaderboard(entries) {
+                try {
+                    localStorage.setItem('typingThunderLeaderboard', JSON.stringify(entries));
+                } catch (error) {
+                    console.error('Failed to persist leaderboard', error);
+                }
+            }
+
+            function renderLeaderboard(entries) {
+                leaderboardBody.innerHTML = '';
+                entries.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.name}</td>
+                        <td>${entry.wpm.toFixed(1)}</td>
+                        <td>${entry.accuracy.toFixed(1)}%</td>
+                        <td>${entry.paragraphs}</td>
+                        <td>${entry.time}</td>
+                    `;
+                    leaderboardBody.appendChild(row);
+                });
+                if (entries.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 6;
+                    cell.textContent = 'No records yet. Deliver your first dispatch to claim the top spot.';
+                    emptyRow.appendChild(cell);
+                    leaderboardBody.appendChild(emptyRow);
+                }
+            }
+
+            function updateLeaderboard(summary) {
+                const entries = loadLeaderboard();
+                entries.push(summary);
+                entries.sort((a, b) => {
+                    if (b.wpm === a.wpm) {
+                        if (b.accuracy === a.accuracy) {
+                            return b.paragraphs - a.paragraphs;
+                        }
+                        return b.accuracy - a.accuracy;
+                    }
+                    return b.wpm - a.wpm;
+                });
+                const trimmed = entries.slice(0, MAX_LEADERBOARD);
+                persistLeaderboard(trimmed);
+                renderLeaderboard(trimmed);
+            }
+
+            function clearLeaderboard() {
+                persistLeaderboard([]);
+                renderLeaderboard([]);
+            }
+
+            startButton.addEventListener('click', startMission);
+            playerNameInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    startMission();
+                }
+            });
+            typeInput.addEventListener('input', handleInput);
+            restartButton.addEventListener('click', handleRestart);
+            debriefButton.addEventListener('click', handleRestart);
+            clearLeaderboardButton.addEventListener('click', () => {
+                clearLeaderboard();
+                logEvent('Leaderboard cleared by command.', 'neutral');
+            });
+            document.addEventListener('click', () => {
+                if (state.gameActive) {
+                    typeInput.focus();
+                }
+            });
+
+            renderLeaderboard(loadLeaderboard());
+            updateStats();
+            updateTimer();
+            playerNameInput.focus();
+        })();
+    </script>
 </body>
 </html>
