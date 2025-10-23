@@ -3,84 +3,1218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Hokee - Cherokee Medicine Man</title>
+    <title>Operation: Typing Thunder</title>
     <link rel="stylesheet" href="styles.css">
-    <!-- Include the Twitch Embed script -->
-    <script src="https://player.twitch.tv/js/embed/v1.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 </head>
 <body>
-
-    <header>
-        <!-- Navigation menu -->
-        <nav>
-            <ul>
-                <li><a href="#about">About</a></li>
-                <li><a href="#schedule">Schedule</a></li>
-                <li><a href="#donations">Donations</a></li>
-                <li><a href="#socials">Socials</a></li>
-                <li><a href="#livestream">Live Stream</a></li>
-            </ul>
-        </nav>
+    <img class="soldier-avatar" src="https://cdn.vectorstock.com/i/500p/37/74/german-soldier-cartoon-vector-25453774.jpg" alt="German field courier illustration">
+    <header class="hero">
+        <div class="hero-overlay">
+            <h1>Operation: Typing Thunder</h1>
+            <p>Berlin, 1945. Captured and cornered, you must type forged escape reports flawlessly—three strikes and the firing squad pulls the trigger.</p>
+        </div>
     </header>
 
-    <!-- Livestream section -->
-    <section id="livestream">
-        <h2>Live Stream</h2>
-        <div id="twitch-embed"></div>
-    </section>
+    <main>
+        <section id="typing-arena" class="game-area">
+            <div id="player-setup" class="player-setup" role="dialog" aria-modal="true">
+                <div class="player-setup-card">
+                    <h2>Plan Your Escape</h2>
+                    <p>Enter a codename and choose a difficulty. Each page you complete is another step toward slipping past your captors.</p>
+                    <label for="player-name" class="visually-hidden">Codename</label>
+                    <input id="player-name" type="text" maxlength="20" placeholder="Callsign" autocomplete="off">
+                    <div class="difficulty-select" role="group" aria-label="Select escape difficulty">
+                        <button type="button" class="difficulty-option" data-difficulty="easy">Easy Route • 3 reports</button>
+                        <button type="button" class="difficulty-option" data-difficulty="medium">Stealth Route • 6 reports</button>
+                        <button type="button" class="difficulty-option" data-difficulty="hard">Impossible Route • 9 reports</button>
+                    </div>
+                    <button id="start-mission" type="button">Deploy Courier</button>
+                </div>
+            </div>
 
-    <!-- Initialize the Twitch player -->
-    <script type="text/javascript">
-        new Twitch.Player("twitch-embed", {
-            channel: "hokeeshadowwalker",
-            width: "854",
-            height: "480",
-            parent: ["localhost"]
-        });
-    </script>
+            <div class="status-grid" aria-live="polite">
+                <div class="status-block">
+                    <span class="status-label">Codename</span>
+                    <span id="status-name" class="status-value">—</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Difficulty</span>
+                    <span id="status-difficulty" class="status-value">—</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Rounds Remaining</span>
+                    <span id="rounds-remaining" class="status-value">—</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Reports Completed</span>
+                    <span id="paragraphs-completed" class="status-value">0</span>
+                </div>
+                <div class="status-block" id="strikes-status">
+                    <span class="status-label">Strikes</span>
+                    <div id="strike-track" class="strike-track" aria-label="Strikes taken">
+                        <span class="strike-slot" data-slot="1"></span>
+                        <span class="strike-slot" data-slot="2"></span>
+                        <span class="strike-slot" data-slot="3"></span>
+                    </div>
+                </div>
+                <div class="status-block" id="reserve-status">
+                    <span class="status-label">Reserve Lives</span>
+                    <span id="reserve-count" class="status-value">0</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Courier Speed</span>
+                    <span id="wpm" class="status-value">0 WPM</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Accuracy</span>
+                    <span id="accuracy" class="status-value">100%</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Total Keystrokes</span>
+                    <span id="keystrokes" class="status-value">0</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Corrections Logged</span>
+                    <span id="corrections" class="status-value">0</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Flawless Streak</span>
+                    <span id="streak" class="status-value">0 keys</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Best Streak</span>
+                    <span id="best-streak" class="status-value">0 keys</span>
+                </div>
+                <div class="status-block">
+                    <span class="status-label">Mission Time</span>
+                    <span id="mission-clock" class="status-value">00:00</span>
+                </div>
+            </div>
 
-    <!-- About Hokee Section -->
-    <section id="about">
-        <h2>Hokee Shadowwalker</h2>
-        <div class="center-image">
-            <img src="hokeehead.png" alt="Hokee Head Image" class="hokee-head">
-        </div>
-        <h2>About Hokee</h2>
-        <p>Hok'ee Shadowwalker, born on April 17th, 1892, is a man shaped by hardship, resilience...</p>
-    </section>
+            <div class="typewriter" aria-live="assertive">
+                <div class="typewriter-body" id="typewriter">
+                    <div class="typewriter-paper">
+                        <div class="paper-header">Allied Dispatch • Berlin Sector</div>
+                        <div id="round-banner" class="round-banner">Awaiting escape orders…</div>
+                        <div class="target-line">Current transmission:</div>
+                        <p id="paragraph-display" class="paragraph-display"><span id="typed-portion"></span><span id="remaining-portion"></span></p>
+                        <div class="paragraph-progress" aria-hidden="true">
+                            <div id="paragraph-progress-fill" class="paragraph-progress-fill"></div>
+                        </div>
+                        <div class="hint-line">Remember: a single wrong letter counts as a strike.</div>
+                    </div>
+                    <div class="typewriter-platen"></div>
+                    <div class="typewriter-keys">
+                        <div class="key-row"><span>Q</span><span>W</span><span>E</span><span>R</span><span>T</span><span>Y</span><span>U</span><span>I</span><span>O</span><span>P</span></div>
+                        <div class="key-row"><span>A</span><span>S</span><span>D</span><span>F</span><span>G</span><span>H</span><span>J</span><span>K</span><span>L</span></div>
+                        <div class="key-row"><span>Z</span><span>X</span><span>C</span><span>V</span><span>B</span><span>N</span><span>M</span></div>
+                    </div>
+                    <textarea id="type-input" rows="4" autocomplete="off" spellcheck="false" aria-label="Type the Allied transmission" disabled></textarea>
+                </div>
+            </div>
 
-    <!-- Stream Schedule -->
-    <section id="schedule">
-        <h2>Stream Schedule</h2>
-        <ul>
-            <li>Monday: 6 PM - 9 PM</li>
-            <li>Wednesday: 6 PM - 9 PM</li>
-            <li>Friday: 6 PM - 9 PM</li>
-            <li>Saturday: 12 PM - 4 PM</li>
-        </ul>
-    </section>
+            <div id="announcement" role="status" aria-live="assertive"></div>
 
-    <!-- Donations Section -->
-    <section id="donations">
-        <h2>Support the Stream</h2>
-        <a href="https://yourdonationlink.com">
-            <img src="donations_button.png" alt="Donations Button">
-        </a>
-    </section>
+            <div class="battle-log">
+                <h2>Radio Log</h2>
+                <ul id="log-entries"></ul>
+            </div>
 
-    <!-- Socials Section -->
-    <section id="socials">
-        <h2>Connect with Hokee</h2>
-        <ul class="socials">
-            <a href="https://discordapp.com/users/141384806280724480"><img src="discord.png" alt="Discord"></a>
-        </ul>
-    </section>
+            <div class="leaderboard">
+                <div class="leaderboard-header">
+                    <h2>Global Courier Leaderboard</h2>
+                    <button id="clear-leaderboard" type="button">Clear Board</button>
+                </div>
+                <table aria-label="Global courier leaderboard">
+                    <thead>
+                        <tr>
+                            <th scope="col">Rank</th>
+                            <th scope="col">Codename</th>
+                            <th scope="col">Difficulty</th>
+                            <th scope="col">WPM</th>
+                            <th scope="col">Accuracy</th>
+                            <th scope="col">Keystrokes</th>
+                            <th scope="col">Mistakes / Fixes</th>
+                            <th scope="col">Reports</th>
+                            <th scope="col">Time</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body"></tbody>
+                </table>
+            </div>
 
-    <!-- Footer -->
+            <div class="achievements-panel">
+                <div class="achievements-header">
+                    <h2>Escape Achievements</h2>
+                    <button id="reset-achievements" type="button">Reset Achievements</button>
+                </div>
+                <p class="achievements-intro">Complete daring feats to earn decorations. Achievements are saved in your browser.</p>
+                <ul id="achievements-list" class="achievements-list" aria-live="polite"></ul>
+            </div>
+
+            <div class="controls">
+                <button id="restart-button" type="button">Request Reinforcements</button>
+            </div>
+        </section>
+    </main>
+
     <footer>
-        <p>&copy; 2024 Hokee - Cherokee Medicine Man. All rights reserved.</p>
+        <p>&copy; 1945 Allied Command. Survive the night.</p>
     </footer>
 
+    <iframe
+        id="battle-hymn"
+        class="soundtrack"
+        title="Battle ambience"
+        src="https://www.youtube.com/embed/h_FNt31NVLI?autoplay=1&loop=1&playlist=h_FNt31NVLI&controls=0&modestbranding=1&showinfo=0&rel=0&enablejsapi=1&mute=1"
+        allow="autoplay"
+        allowfullscreen>
+    </iframe>
+
+    <div id="game-over" class="game-over" aria-hidden="true">
+        <div class="game-over-content">
+            <h2 id="game-over-title">Mission Failed</h2>
+            <p id="game-over-message"></p>
+            <dl class="final-stats">
+                <div>
+                    <dt>WPM</dt>
+                    <dd id="final-wpm">0</dd>
+                </div>
+                <div>
+                    <dt>Accuracy</dt>
+                    <dd id="final-accuracy">0%</dd>
+                </div>
+                <div>
+                    <dt>Keystrokes</dt>
+                    <dd id="final-keystrokes">0</dd>
+                </div>
+                <div>
+                    <dt>Mistakes</dt>
+                    <dd id="final-mistakes">0</dd>
+                </div>
+                <div>
+                    <dt>Corrections</dt>
+                    <dd id="final-corrections">0</dd>
+                </div>
+                <div>
+                    <dt>Reports Completed</dt>
+                    <dd id="final-paragraphs">0</dd>
+                </div>
+                <div>
+                    <dt>Difficulty</dt>
+                    <dd id="final-difficulty">—</dd>
+                </div>
+                <div>
+                    <dt>Mission Time</dt>
+                    <dd id="final-time">00:00</dd>
+                </div>
+            </dl>
+            <button id="debrief-button" type="button">Return to Briefing</button>
+        </div>
+        <div class="game-over-blood"></div>
+        <div class="game-over-flash"></div>
+    </div>
+
+    <script>
+        (function () {
+            const missions = {
+                easy: {
+                    rounds: 3,
+                    prompts: [
+                        "A sympathetic nurse slides you a smuggled typewriter and whispers that the escape tunnel will open at midnight if your report looks official.",
+                        "You detail fake orders rerouting the guard patrol, praying every keystroke convinces the Kommandant.",
+                        "Each word you type buys your squad more time to cut through the cellar bars beneath the barracks.",
+                        "Moonlight spills through the bars as you forge a supply request promising extra rations for the guards on duty.",
+                        "You mimic the clerk's clipped tone, authorizing a late-night roll call that will draw soldiers away from the tunnel.",
+                        "Sweat beads on your brow while you describe a forged inspection that orders everyone to assemble in the courtyard.",
+                        "You draft a message blaming missing uniforms on a phantom audit, hoping the quartermaster signs without question.",
+                        "You quietly mention a visiting colonel in your report, knowing the guards will scramble to prepare formalities."
+                    ]
+                },
+                medium: {
+                    rounds: 6,
+                    prompts: [
+                        "Rain beats against the barrack roof while you forge an ammunition audit that will empty the watchtower just before your dash across the yard.",
+                        "You recall the sergeant's handwriting from confiscated ledgers and mimic every stroke as you authorize a prisoner transfer to the rail yard.",
+                        "Your fingers tremble while you invent casualty numbers, hoping the morse intercept team trusts the forged seal.",
+                        "The tunnel diggers wait for your cue; you describe a phony medical quarantine that will seal off the infirmary corridor.",
+                        "Shellfire rattles the windows as you encode coordinates for a non-existent inspection that should lure the guards away.",
+                        "You fold in rumors about Allied advances, padding your report with enough fear to earn an evacuation order.",
+                        "Your bunkmate stands lookout as you assign the night shift to a guard already detained for questioning.",
+                        "You list imaginary fuel leaks that will seal the motor pool and thin the night patrol.",
+                        "You lace the dispatch with counterfeit signatures so convincing the adjutant will never question them.",
+                        "You recount a fake escape attempt to justify doubling the guards along the western wall while the tunnelers work east.",
+                        "You cite forged telegrams demanding all radios be inspected at once, leaving the barracks eerily quiet.",
+                        "You reference a made-up inspection team whose sudden arrival should send the garrison scrambling."
+                    ]
+                },
+                hard: {
+                    rounds: 9,
+                    prompts: [
+                        "Floodlights sweep the yard while you craft a meticulous requisition log, matching every serial number stolen from last week's munitions shipment.",
+                        "You adjust the carriage with bloodied knuckles, documenting a fabricated Gestapo summons that demands the camp commandant's presence in Berlin.",
+                        "Cold wind knifes through the cracks as you cite invented chemical leaks, referencing the manual you memorized during interrogation.",
+                        "The radio crackles with enemy chatter while you weave a forged order relocating half the guard platoon to reinforce a collapsing bridge.",
+                        "Prisoners crowd around the latrine tunnel, hanging on your words as you authorize a false prisoner exchange set for dawn.",
+                        "Every keystroke echoes in the silent barracks while you imitate the colonel's clipped cadence to request emergency transport vehicles.",
+                        "You embed subtle code phrases in the margins, assuring the resistance that the east fence will be unguarded after roll call.",
+                        "The typewriter ribbon begins to fray, yet you outline a supply shortage severe enough to justify unlocking the armory.",
+                        "Mortars thud in the distance as you finalize evacuation manifests that will put every guard on the road by nightfall.",
+                        "You describe a counterfeit firing squad rehearsal that will empty the courtyard precisely when you plan to run.",
+                        "You weave in fake engineering diagrams proving the northern wall is unsafe, forcing the guards to retreat inside.",
+                        "You compose a meticulous manifest rerouting every prisoner for 'classification', hiding your squad among the names.",
+                        "You draft a brazen order stripping the armoury for transport, knowing the sentries will argue long enough for you to vanish.",
+                        "You lace the final paragraph with coded assurances that the getaway truck will be waiting beyond the gate."
+                    ]
+                }
+            };
+            const difficultyNames = {
+                easy: 'Easy Route',
+                medium: 'Stealth Route',
+                hard: 'Impossible Route'
+            };
+
+            const statusDifficulty = document.getElementById('status-difficulty');
+            const roundsRemainingDisplay = document.getElementById('rounds-remaining');
+            const paragraphsCompleted = document.getElementById('paragraphs-completed');
+            const strikeTrack = document.getElementById('strike-track');
+            const wpmDisplay = document.getElementById('wpm');
+            const accuracyDisplay = document.getElementById('accuracy');
+            const keystrokesDisplay = document.getElementById('keystrokes');
+            const correctionsDisplay = document.getElementById('corrections');
+            const streakDisplay = document.getElementById('streak');
+            const bestStreakDisplay = document.getElementById('best-streak');
+            const missionClock = document.getElementById('mission-clock');
+            const typedPortion = document.getElementById('typed-portion');
+            const remainingPortion = document.getElementById('remaining-portion');
+            const progressFill = document.getElementById('paragraph-progress-fill');
+            const announcement = document.getElementById('announcement');
+            const logEntries = document.getElementById('log-entries');
+            const typewriter = document.getElementById('typewriter');
+            const typeInput = document.getElementById('type-input');
+            const startButton = document.getElementById('start-mission');
+            const playerNameInput = document.getElementById('player-name');
+            const playerSetup = document.getElementById('player-setup');
+            const statusName = document.getElementById('status-name');
+            const roundBanner = document.getElementById('round-banner');
+            const restartButton = document.getElementById('restart-button');
+            const debriefButton = document.getElementById('debrief-button');
+            const gameOverPanel = document.getElementById('game-over');
+            const gameOverTitle = document.getElementById('game-over-title');
+            const gameOverMessage = document.getElementById('game-over-message');
+            const finalWpm = document.getElementById('final-wpm');
+            const finalAccuracy = document.getElementById('final-accuracy');
+            const finalKeystrokes = document.getElementById('final-keystrokes');
+            const finalMistakes = document.getElementById('final-mistakes');
+            const finalCorrections = document.getElementById('final-corrections');
+            const finalParagraphs = document.getElementById('final-paragraphs');
+            const finalDifficulty = document.getElementById('final-difficulty');
+            const finalTime = document.getElementById('final-time');
+            const leaderboardBody = document.getElementById('leaderboard-body');
+            const clearLeaderboardButton = document.getElementById('clear-leaderboard');
+            const soundtrackFrame = document.getElementById('battle-hymn');
+            const difficultyButtons = document.querySelectorAll('.difficulty-option');
+            const reserveDisplay = document.getElementById('reserve-count');
+            const achievementsList = document.getElementById('achievements-list');
+            const resetAchievementsButton = document.getElementById('reset-achievements');
+            const strikesStatus = document.getElementById('strikes-status');
+            const reserveStatus = document.getElementById('reserve-status');
+            let pendingDifficulty = 'easy';
+
+            const MAX_LEADERBOARD = 10;
+            const MAX_RESERVE_LIVES = 3;
+
+            const ACHIEVEMENTS = [
+                { id: 'first-report', name: 'Ink on the Keys', description: 'Deliver your first forged report.' },
+                { id: 'flawless-report', name: 'Ghost Writer', description: 'Complete a report without a mistake.' },
+                { id: 'reserve-earned', name: 'Hidden Ally', description: 'Earn a reserve life for perfect typing.' },
+                { id: 'reserve-spent', name: 'Last Gasp', description: 'Spend a reserve life to survive a strike.' },
+                { id: 'speed-ace', name: 'Lightning Courier', description: 'Finish an escape with at least 80 WPM.' },
+                { id: 'accuracy-ace', name: 'Iron Quill', description: 'Finish an escape with at least 99% accuracy.' },
+                { id: 'zero-mistakes', name: 'Untouchable', description: 'Escape without making a single mistake.' },
+                { id: 'hard-victory', name: 'Impossible Escape', description: 'Win on the Impossible Route.' },
+                { id: 'comeback', name: 'Steel Nerves', description: 'Escape after reaching two strikes.' },
+                { id: 'streak-master', name: 'Silent Typist', description: 'Reach a flawless streak of 150 keys.' }
+            ];
+            const ACHIEVEMENT_STORAGE_KEY = 'typingThunderAchievements';
+            const achievementMap = new Map(ACHIEVEMENTS.map((achievement) => [achievement.id, achievement]));
+            const achievementState = {
+                unlocked: new Set()
+            };
+
+            const state = {
+                playerName: '',
+                difficulty: null,
+                roundGoal: 0,
+                roundIndex: 0,
+                strikes: 0,
+                reserveLives: 0,
+                paragraphsDelivered: 0,
+                totalCorrectChars: 0,
+                mistakes: 0,
+                keystrokes: 0,
+                corrections: 0,
+                activeParagraph: '',
+                usedParagraphs: [],
+                startTime: null,
+                elapsedInterval: null,
+                gameActive: false,
+                errorIndex: null,
+                lockedValue: '',
+                currentStreak: 0,
+                longestStreak: 0,
+                lastMatchLength: 0,
+                roundStrikes: 0,
+                highestStrikes: 0
+            };
+
+            let soundtrackUnlocked = false;
+            function postToSoundtrack(message) {
+                if (!soundtrackFrame || !soundtrackFrame.contentWindow) {
+                    return;
+                }
+                soundtrackFrame.contentWindow.postMessage(JSON.stringify(message), '*');
+            }
+
+            function activateSoundtrack() {
+                if (!soundtrackFrame) {
+                    return;
+                }
+                postToSoundtrack({ event: 'command', func: 'playVideo', args: [] });
+            }
+
+            function unmuteSoundtrack() {
+                if (soundtrackUnlocked) {
+                    return;
+                }
+                soundtrackUnlocked = true;
+                postToSoundtrack({ event: 'command', func: 'unMute', args: [] });
+                postToSoundtrack({ event: 'command', func: 'setVolume', args: [100] });
+                postToSoundtrack({ event: 'command', func: 'playVideo', args: [] });
+            }
+
+            if (soundtrackFrame) {
+                soundtrackFrame.addEventListener('load', activateSoundtrack);
+            }
+
+            function sampleParagraph() {
+                if (!state.difficulty || !missions[state.difficulty]) {
+                    return '';
+                }
+                const pool = missions[state.difficulty].prompts;
+                if (!pool || pool.length === 0) {
+                    return '';
+                }
+                if (state.usedParagraphs.length >= pool.length) {
+                    state.usedParagraphs = [];
+                }
+                let candidate;
+                let safety = 0;
+                do {
+                    candidate = pool[Math.floor(Math.random() * pool.length)];
+                    safety += 1;
+                } while (state.usedParagraphs.includes(candidate) && safety < 20);
+                candidate = typeof candidate === 'string' ? candidate.trim() : '';
+                state.usedParagraphs.push(candidate);
+                return candidate;
+            }
+
+            function formatTime(ms) {
+                const totalSeconds = Math.floor(ms / 1000);
+                const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+                const seconds = String(totalSeconds % 60).padStart(2, '0');
+                return `${minutes}:${seconds}`;
+            }
+
+            function computeWpm(correctOverride) {
+                if (!state.startTime) {
+                    return 0;
+                }
+                const elapsedMinutes = Math.max((performance.now() - state.startTime) / 60000, 1 / 60);
+                const correct = typeof correctOverride === 'number' ? correctOverride : state.totalCorrectChars;
+                return (correct / 5) / elapsedMinutes;
+            }
+
+            function computeAccuracy(correctOverride, mistakeOverride) {
+                const correct = typeof correctOverride === 'number' ? correctOverride : state.totalCorrectChars;
+                const mistakes = typeof mistakeOverride === 'number' ? mistakeOverride : state.mistakes;
+                const total = correct + mistakes;
+                if (total === 0) {
+                    return 100;
+                }
+                return (correct / total) * 100;
+            }
+
+            function updateStrikeDisplay() {
+                [...strikeTrack.children].forEach((slot, index) => {
+                    slot.classList.toggle('active', index < state.strikes);
+                });
+            }
+
+            function updateReserveDisplay() {
+                if (reserveDisplay) {
+                    reserveDisplay.textContent = state.reserveLives;
+                }
+            }
+
+            function flashStatus(element) {
+                if (!element) {
+                    return;
+                }
+                element.classList.remove('pulse');
+                void element.offsetWidth;
+                element.classList.add('pulse');
+                setTimeout(() => element.classList.remove('pulse'), 600);
+            }
+
+            function loadAchievementState() {
+                try {
+                    const stored = localStorage.getItem(ACHIEVEMENT_STORAGE_KEY);
+                    if (!stored) {
+                        achievementState.unlocked = new Set();
+                        return;
+                    }
+                    const parsed = JSON.parse(stored);
+                    if (Array.isArray(parsed)) {
+                        achievementState.unlocked = new Set(parsed);
+                    }
+                } catch (error) {
+                    console.error('Failed to read achievements', error);
+                    achievementState.unlocked = new Set();
+                }
+            }
+
+            function persistAchievements() {
+                try {
+                    localStorage.setItem(ACHIEVEMENT_STORAGE_KEY, JSON.stringify([...achievementState.unlocked]));
+                } catch (error) {
+                    console.error('Failed to persist achievements', error);
+                }
+            }
+
+            function renderAchievements() {
+                if (!achievementsList) {
+                    return;
+                }
+                achievementsList.innerHTML = '';
+                ACHIEVEMENTS.forEach((achievement) => {
+                    const unlocked = achievementState.unlocked.has(achievement.id);
+                    const item = document.createElement('li');
+                    item.className = `achievement ${unlocked ? 'unlocked' : 'locked'}`;
+                    item.setAttribute('data-achievement', achievement.id);
+                    item.innerHTML = `
+                        <div class="achievement-header">
+                            <span class="achievement-name">${achievement.name}</span>
+                            <span class="achievement-status" aria-hidden="true">${unlocked ? '★' : '✖'}</span>
+                        </div>
+                        <p class="achievement-desc">${achievement.description}</p>
+                    `;
+                    if (unlocked) {
+                        item.setAttribute('aria-label', `${achievement.name} unlocked: ${achievement.description}`);
+                    } else {
+                        item.setAttribute('aria-label', `${achievement.name} locked: ${achievement.description}`);
+                    }
+                    achievementsList.appendChild(item);
+                });
+            }
+
+            function unlockAchievement(id) {
+                if (!achievementMap.has(id) || achievementState.unlocked.has(id)) {
+                    return;
+                }
+                achievementState.unlocked.add(id);
+                persistAchievements();
+                renderAchievements();
+                const achievement = achievementMap.get(id);
+                logEvent(`Achievement unlocked: ${achievement.name}`, 'achievement');
+                if (state.gameActive) {
+                    setAnnouncement(`Achievement unlocked: ${achievement.name}!`, 'achievement');
+                }
+            }
+
+            function resetAchievements() {
+                achievementState.unlocked.clear();
+                persistAchievements();
+                renderAchievements();
+                logEvent('Achievement board wiped clean.', 'neutral');
+                setAnnouncement('Achievements reset. Begin anew.', 'info');
+            }
+
+            function evaluateRunAchievements({ victory, wpm, accuracy }) {
+                if (wpm >= 80) {
+                    unlockAchievement('speed-ace');
+                }
+                if (accuracy >= 99) {
+                    unlockAchievement('accuracy-ace');
+                }
+                if (state.longestStreak >= 150) {
+                    unlockAchievement('streak-master');
+                }
+                if (victory) {
+                    if (state.mistakes === 0) {
+                        unlockAchievement('zero-mistakes');
+                    }
+                    if (state.difficulty === 'hard') {
+                        unlockAchievement('hard-victory');
+                    }
+                    if (state.highestStrikes >= 2) {
+                        unlockAchievement('comeback');
+                    }
+                }
+            }
+
+            function updateStats(currentMatchLength = state.lastMatchLength) {
+                const effectiveCorrect = state.totalCorrectChars + currentMatchLength;
+                const mistakes = state.mistakes;
+                const roundsLeft = Math.max(state.roundGoal - state.roundIndex, 0);
+                roundsRemainingDisplay.textContent = state.roundGoal ? roundsLeft : '—';
+                paragraphsCompleted.textContent = state.roundIndex;
+                statusDifficulty.textContent = difficultyNames[state.difficulty] || '—';
+                wpmDisplay.textContent = `${computeWpm(effectiveCorrect).toFixed(1)} WPM`;
+                accuracyDisplay.textContent = `${computeAccuracy(effectiveCorrect, mistakes).toFixed(1)}%`;
+                keystrokesDisplay.textContent = state.keystrokes;
+                correctionsDisplay.textContent = state.corrections;
+                streakDisplay.textContent = `${state.currentStreak} keys`;
+                bestStreakDisplay.textContent = `${state.longestStreak} keys`;
+                updateStrikeDisplay();
+                updateReserveDisplay();
+            }
+
+            function updateTimer() {
+                if (!state.startTime) {
+                    missionClock.textContent = '00:00';
+                    return;
+                }
+                missionClock.textContent = formatTime(performance.now() - state.startTime);
+            }
+
+            function updateRoundBanner() {
+                roundBanner.classList.remove('success', 'failure');
+                if (!state.gameActive || !state.roundGoal) {
+                    roundBanner.textContent = 'Awaiting escape orders…';
+                    return;
+                }
+                const current = Math.min(state.roundIndex + 1, state.roundGoal);
+                roundBanner.textContent = `Report ${current} of ${state.roundGoal}`;
+            }
+
+            function setParagraph(text) {
+                const sanitized = typeof text === 'string' ? text.trimEnd() : '';
+                state.activeParagraph = sanitized;
+                typedPortion.textContent = '';
+                remainingPortion.textContent = sanitized;
+                typeInput.value = '';
+                typewriter.style.setProperty('--typed-length', 0);
+                typeInput.focus();
+                state.errorIndex = null;
+                state.lockedValue = '';
+                state.lastMatchLength = 0;
+                state.roundStrikes = 0;
+                updateProgress(0, sanitized.length);
+                updateRoundBanner();
+            }
+
+            function logEvent(message, variant = 'neutral') {
+                const entry = document.createElement('li');
+                entry.textContent = message;
+                entry.className = variant;
+                logEntries.prepend(entry);
+                while (logEntries.children.length > 8) {
+                    logEntries.removeChild(logEntries.lastChild);
+                }
+            }
+
+            function setAnnouncement(message, variant) {
+                announcement.textContent = message;
+                announcement.className = variant;
+            }
+
+            function resetTypewriterAnimation() {
+                typewriter.classList.remove('shake');
+                void typewriter.offsetWidth;
+            }
+
+            function recordStrike(currentMatchLength = state.lastMatchLength) {
+                state.mistakes += 1;
+                state.roundStrikes += 1;
+                state.currentStreak = 0;
+                resetTypewriterAnimation();
+                typewriter.classList.add('shake');
+
+                let reserveConsumed = false;
+                if (state.reserveLives > 0) {
+                    state.reserveLives -= 1;
+                    reserveConsumed = true;
+                    flashStatus(reserveStatus);
+                    updateReserveDisplay();
+                    updateStrikeDisplay();
+                    logEvent('A hidden ally covers your slip before the guards react.', 'success');
+                    unlockAchievement('reserve-spent');
+                } else {
+                    state.strikes += 1;
+                    if (state.strikes > state.highestStrikes) {
+                        state.highestStrikes = state.strikes;
+                    }
+                    flashStatus(strikesStatus);
+                    updateStrikeDisplay();
+                    logEvent('A guard narrows his eyes at the forged document.', 'danger');
+                    if (state.strikes >= 3) {
+                        updateStats(currentMatchLength);
+                        endGame(false);
+                        return { reserveConsumed };
+                    }
+                }
+
+                updateStats(currentMatchLength);
+                return { reserveConsumed };
+            }
+
+            function completeReport(charsTyped) {
+                state.totalCorrectChars += charsTyped;
+                state.lastMatchLength = 0;
+                state.roundIndex += 1;
+                state.paragraphsDelivered = state.roundIndex;
+                state.currentStreak = 0;
+
+                const perfectRound = state.roundStrikes === 0;
+                const roundsLeft = Math.max(state.roundGoal - state.roundIndex, 0);
+
+                if (state.roundIndex === 1) {
+                    unlockAchievement('first-report');
+                }
+                if (perfectRound) {
+                    unlockAchievement('flawless-report');
+                }
+
+                let announcementMessage = 'Report accepted.';
+                let announcementTone = 'success';
+
+                if (state.roundStrikes > 0 && state.strikes > 0) {
+                    state.strikes = Math.max(0, state.strikes - 1);
+                    flashStatus(strikesStatus);
+                    updateStrikeDisplay();
+                    logEvent('Command buys your forged orders and rescinds one strike.', 'success');
+                    announcementMessage += ' Suspicion eased—one strike cleared.';
+                } else if (perfectRound && state.strikes === 0) {
+                    if (state.reserveLives < MAX_RESERVE_LIVES) {
+                        state.reserveLives += 1;
+                        flashStatus(reserveStatus);
+                        logEvent('Perfect delivery earns you a reserve life.', 'success');
+                        unlockAchievement('reserve-earned');
+                        announcementMessage += ' Perfect delivery grants you a reserve life.';
+                        announcementTone = 'victory';
+                    } else {
+                        logEvent('Perfect delivery. Reserve lives already at maximum readiness.', 'neutral');
+                    }
+                }
+
+                state.roundStrikes = 0;
+                updateReserveDisplay();
+                updateStrikeDisplay();
+                updateStats();
+
+                if (roundsLeft > 0) {
+                    logEvent(`Report ${state.roundIndex} delivered. ${roundsLeft} more until the escape is ready.`, 'success');
+                    announcementMessage += ' Prepare the next forged order.';
+                } else {
+                    logEvent('Final report delivered. The escape plan is complete!', 'success');
+                }
+
+                if (state.roundIndex >= state.roundGoal) {
+                    endGame(true);
+                    return null;
+                }
+
+                const nextParagraph = sampleParagraph();
+                setParagraph(nextParagraph);
+                return { message: announcementMessage, tone: announcementTone };
+            }
+
+            function resetGameState(options = {}) {
+                const preserveDifficulty = Boolean(options.preserveDifficulty);
+                if (!preserveDifficulty) {
+                    state.difficulty = null;
+                state.roundGoal = 0;
+                }
+                state.roundIndex = 0;
+                state.paragraphsDelivered = 0;
+                state.strikes = 0;
+                state.reserveLives = 0;
+                state.totalCorrectChars = 0;
+                state.mistakes = 0;
+                state.keystrokes = 0;
+                state.corrections = 0;
+                state.activeParagraph = '';
+                state.usedParagraphs = [];
+                state.startTime = null;
+                if (state.elapsedInterval) {
+                    clearInterval(state.elapsedInterval);
+                    state.elapsedInterval = null;
+                }
+                state.gameActive = false;
+                state.errorIndex = null;
+                state.lockedValue = '';
+                state.currentStreak = 0;
+                state.longestStreak = 0;
+                state.lastMatchLength = 0;
+                state.roundStrikes = 0;
+                state.highestStrikes = 0;
+                missionClock.textContent = '00:00';
+                typedPortion.textContent = '';
+                remainingPortion.textContent = '';
+                announcement.textContent = '';
+                announcement.className = '';
+                logEntries.innerHTML = '';
+                updateProgress(0, 1);
+                updateStats();
+                updateTimer();
+                updateStrikeDisplay();
+                updateReserveDisplay();
+                typeInput.setAttribute('disabled', 'disabled');
+                roundsRemainingDisplay.textContent = state.roundGoal ? state.roundGoal : '—';
+                paragraphsCompleted.textContent = 0;
+                if (!preserveDifficulty) {
+                    statusDifficulty.textContent = '—';
+                }
+                roundBanner.textContent = 'Awaiting escape orders…';
+                roundBanner.classList.remove('success', 'failure');
+            }
+
+            function startMission() {
+                const trimmedName = playerNameInput.value.trim();
+                if (!trimmedName) {
+                    playerNameInput.focus();
+                    return;
+                }
+                const chosenDifficulty = pendingDifficulty && missions[pendingDifficulty] ? pendingDifficulty : 'easy';
+                const missionProfile = missions[chosenDifficulty];
+                if (!missionProfile) {
+                    return;
+                }
+                state.difficulty = chosenDifficulty;
+                state.roundGoal = missionProfile.rounds;
+                resetGameState({ preserveDifficulty: true });
+                state.playerName = trimmedName;
+                statusName.textContent = trimmedName;
+                statusDifficulty.textContent = difficultyNames[state.difficulty] || '—';
+                playerSetup.classList.add('hidden');
+                typeInput.removeAttribute('disabled');
+                state.gameActive = true;
+                state.startTime = null;
+                setParagraph(sampleParagraph());
+                setAnnouncement('Forged orders ready. Keep your cover by typing flawlessly.', 'info');
+                logEvent(`Escape difficulty locked: ${difficultyNames[state.difficulty]} — ${state.roundGoal} reports to freedom.`, 'neutral');
+                logEvent('You sit at the barrack desk and begin forging your escape papers.', 'neutral');
+                updateStats();
+                updateTimer();
+                unmuteSoundtrack();
+            }
+
+            function endGame(victory) {
+                state.gameActive = false;
+                typeInput.setAttribute('disabled', 'disabled');
+                if (state.elapsedInterval) {
+                    clearInterval(state.elapsedInterval);
+                    state.elapsedInterval = null;
+                }
+                const elapsed = state.startTime ? performance.now() - state.startTime : 0;
+                const totalCorrect = state.totalCorrectChars + state.lastMatchLength;
+                const wpm = computeWpm(totalCorrect);
+                const accuracy = computeAccuracy(totalCorrect, state.mistakes);
+                const timeLabel = formatTime(elapsed);
+                finalWpm.textContent = wpm.toFixed(1);
+                finalAccuracy.textContent = `${accuracy.toFixed(1)}%`;
+                finalKeystrokes.textContent = state.keystrokes;
+                finalMistakes.textContent = state.mistakes;
+                finalCorrections.textContent = state.corrections;
+                finalParagraphs.textContent = state.paragraphsDelivered;
+                finalDifficulty.textContent = difficultyNames[state.difficulty] || '—';
+                finalTime.textContent = timeLabel;
+
+                evaluateRunAchievements({ victory, wpm, accuracy });
+
+                const summary = {
+                    name: state.playerName,
+                    wpm: Number(wpm.toFixed(2)),
+                    accuracy: Number(accuracy.toFixed(2)),
+                    keystrokes: state.keystrokes,
+                    mistakes: state.mistakes,
+                    corrections: state.corrections,
+                    paragraphs: state.paragraphsDelivered,
+                    time: timeLabel,
+                    difficulty: state.difficulty,
+                    timestamp: Date.now()
+                };
+                updateLeaderboard(summary);
+
+                if (victory) {
+                    setAnnouncement('Freedom! Your forged reports fooled every guard.', 'victory');
+                    logEvent('The resistance smuggles you beyond the camp walls.', 'success');
+                    gameOverTitle.textContent = 'Escape Successful';
+                    gameOverMessage.textContent = `The escape tunnel opens and ${state.playerName} disappears into the Berlin night.`;
+                    roundBanner.textContent = 'Freedom secured!';
+                    roundBanner.classList.remove('failure');
+                    roundBanner.classList.add('success');
+                    gameOverPanel.classList.remove('fatal');
+                } else {
+                    setAnnouncement('Alarms blare. The guards close in on your cell.', 'defeat');
+                    logEvent('The commandant tears up your forged papers and orders the firing squad.', 'danger');
+                    gameOverTitle.textContent = 'Escape Failed';
+                    gameOverMessage.textContent = `Three mistakes exposed your plan, ${state.playerName}. The attempt ends here.`;
+                    roundBanner.textContent = 'Captured under guard.';
+                    roundBanner.classList.remove('success');
+                    roundBanner.classList.add('failure');
+                    gameOverPanel.classList.add('fatal');
+                }
+
+                gameOverPanel.setAttribute('aria-hidden', 'false');
+                gameOverPanel.classList.add('visible');
+            }
+
+            function hideGameOver() {
+                gameOverPanel.classList.remove('visible');
+                gameOverPanel.setAttribute('aria-hidden', 'true');
+            }
+
+            function handleKeydown(event) {
+                if (event.key === 'Enter' || event.key === 'Tab') {
+                    event.preventDefault();
+                }
+                if (!state.gameActive) {
+                    return;
+                }
+                if (event.metaKey || event.ctrlKey || event.altKey) {
+                    return;
+                }
+                if (event.key.length === 1 || event.key === 'Backspace' || event.key === 'Delete') {
+                    state.keystrokes += 1;
+                    updateStats();
+                }
+            }
+
+            function handleInput() {
+                if (!state.gameActive) {
+                    typeInput.value = '';
+                    return;
+                }
+                let typed = typeInput.value;
+                const expected = state.activeParagraph;
+                if (!state.startTime) {
+                    state.startTime = performance.now();
+                    if (!state.elapsedInterval) {
+                        state.elapsedInterval = setInterval(updateTimer, 250);
+                    }
+                }
+                if (state.errorIndex !== null) {
+                    const locked = state.lockedValue;
+                    if ((typed.length > locked.length && typed.startsWith(locked)) || (typed.length === locked.length && typed !== locked)) {
+                        typeInput.value = locked;
+                        typed = locked;
+                    }
+                }
+
+                let matchLength = 0;
+                let mismatch = null;
+                const limit = Math.min(typed.length, expected.length);
+                for (let i = 0; i < limit; i++) {
+                    if (typed[i] !== expected[i]) {
+                        mismatch = {
+                            index: i,
+                            expectedChar: expected[i] ?? null,
+                            typedChar: typed[i] ?? ''
+                        };
+                        break;
+                    }
+                }
+                if (mismatch) {
+                    matchLength = mismatch.index;
+                } else {
+                    matchLength = limit;
+                    if (typed.length > expected.length) {
+                        mismatch = {
+                            index: expected.length,
+                            expectedChar: null,
+                            typedChar: typed[expected.length] ?? '',
+                            overflow: true
+                        };
+                    }
+                }
+
+                renderParagraph(matchLength, mismatch);
+                typewriter.style.setProperty('--typed-length', matchLength);
+                updateProgress(matchLength, expected.length);
+
+                if (mismatch) {
+                    if (state.errorIndex === null) {
+                        state.errorIndex = matchLength;
+                        state.lockedValue = typed;
+                        const strikeResult = recordStrike(matchLength);
+                        if (state.gameActive) {
+                            const message = strikeResult && strikeResult.reserveConsumed
+                                ? 'A reserve life masked your mistake! Backspace immediately before suspicion returns.'
+                                : 'You mis-typed a letter! Backspace before the guard notices.';
+                            setAnnouncement(message, 'warning');
+                        }
+                    } else {
+                        if (typed.length <= state.errorIndex && expected.startsWith(typed)) {
+                            state.errorIndex = null;
+                            state.lockedValue = typed;
+                            state.corrections += 1;
+                            logEvent('Error corrected. Fingers steady.', 'success');
+                            setAnnouncement('Error cleared. Continue the deception.', 'info');
+                        } else {
+                            state.lockedValue = typed;
+                        }
+                    }
+                    state.lastMatchLength = matchLength;
+                    updateStats(matchLength);
+                    return;
+                }
+
+                if (state.errorIndex !== null) {
+                    if (typed.length <= state.errorIndex && expected.startsWith(typed)) {
+                        state.errorIndex = null;
+                        state.lockedValue = typed;
+                        state.corrections += 1;
+                        logEvent('Error corrected. Fingers steady.', 'success');
+                        setAnnouncement('Error cleared. Continue the deception.', 'info');
+                    } else {
+                        typeInput.value = state.lockedValue;
+                        updateStats(matchLength);
+                        return;
+                    }
+                }
+
+                const gained = matchLength - state.lastMatchLength;
+                if (gained > 0) {
+                    state.currentStreak += gained;
+                    if (state.currentStreak > state.longestStreak) {
+                        state.longestStreak = state.currentStreak;
+                        if (state.longestStreak >= 150) {
+                            unlockAchievement('streak-master');
+                        }
+                    }
+                } else if (matchLength < state.lastMatchLength) {
+                    state.currentStreak = matchLength;
+                }
+                state.lastMatchLength = matchLength;
+
+                updateStats(matchLength);
+                state.lockedValue = typed;
+
+                if (typed === expected) {
+                    const outcome = completeReport(expected.length);
+                    if (state.gameActive && outcome && outcome.message) {
+                        setAnnouncement(outcome.message, outcome.tone || 'success');
+                    }
+                    state.lockedValue = '';
+                    typewriter.classList.add('success');
+                    setTimeout(() => typewriter.classList.remove('success'), 400);
+                }
+            }
+
+            function handleRestart() {
+                hideGameOver();
+                resetGameState();
+                playerSetup.classList.remove('hidden');
+                playerNameInput.value = state.playerName;
+                playerNameInput.focus();
+            }
+
+            function loadLeaderboard() {
+                try {
+                    const stored = localStorage.getItem('typingThunderLeaderboard');
+                    if (!stored) {
+                        return [];
+                    }
+                    return JSON.parse(stored);
+                } catch (error) {
+                    console.error('Failed to read leaderboard', error);
+                    return [];
+                }
+            }
+
+            function persistLeaderboard(entries) {
+                try {
+                    localStorage.setItem('typingThunderLeaderboard', JSON.stringify(entries));
+                } catch (error) {
+                    console.error('Failed to persist leaderboard', error);
+                }
+            }
+
+            function renderLeaderboard(entries) {
+                leaderboardBody.innerHTML = '';
+                entries.forEach((entry, index) => {
+                    const row = document.createElement('tr');
+                    const wpm = typeof entry.wpm === 'number' ? entry.wpm : 0;
+                    const accuracy = typeof entry.accuracy === 'number' ? entry.accuracy : 0;
+                    const keystrokes = typeof entry.keystrokes === 'number' ? entry.keystrokes : 0;
+                    const mistakes = typeof entry.mistakes === 'number' ? entry.mistakes : 0;
+                    const corrections = typeof entry.corrections === 'number' ? entry.corrections : 0;
+                    const paragraphs = typeof entry.paragraphs === 'number' ? entry.paragraphs : 0;
+                    const difficultyLabel = difficultyNames[entry.difficulty] || (typeof entry.difficulty === 'string' ? entry.difficulty : '—');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${entry.name}</td>
+                        <td>${difficultyLabel}</td>
+                        <td>${wpm.toFixed(1)}</td>
+                        <td>${accuracy.toFixed(1)}%</td>
+                        <td>${keystrokes}</td>
+                        <td>${mistakes} / ${corrections}</td>
+                        <td>${paragraphs}</td>
+                        <td>${entry.time}</td>
+                    `;
+                    leaderboardBody.appendChild(row);
+                });
+                if (entries.length === 0) {
+                    const emptyRow = document.createElement('tr');
+                    const cell = document.createElement('td');
+                    cell.colSpan = 9;
+                    cell.textContent = 'No records yet. Deliver your first dispatch to claim the top spot.';
+                    emptyRow.appendChild(cell);
+                    leaderboardBody.appendChild(emptyRow);
+                }
+            }
+
+            function updateLeaderboard(summary) {
+                const entries = loadLeaderboard();
+                entries.push(summary);
+                entries.sort((a, b) => {
+                    if (b.wpm !== a.wpm) {
+                        return b.wpm - a.wpm;
+                    }
+                    if (b.accuracy !== a.accuracy) {
+                        return b.accuracy - a.accuracy;
+                    }
+                    const mistakesA = typeof a.mistakes === 'number' ? a.mistakes : Number.MAX_SAFE_INTEGER;
+                    const mistakesB = typeof b.mistakes === 'number' ? b.mistakes : Number.MAX_SAFE_INTEGER;
+                    if (mistakesA !== mistakesB) {
+                        return mistakesA - mistakesB;
+                    }
+                    if (b.paragraphs !== a.paragraphs) {
+                        return b.paragraphs - a.paragraphs;
+                    }
+                    const keystrokesA = typeof a.keystrokes === 'number' ? a.keystrokes : 0;
+                    const keystrokesB = typeof b.keystrokes === 'number' ? b.keystrokes : 0;
+                    if (keystrokesB !== keystrokesA) {
+                        return keystrokesB - keystrokesA;
+                    }
+                    const correctionsA = typeof a.corrections === 'number' ? a.corrections : 0;
+                    const correctionsB = typeof b.corrections === 'number' ? b.corrections : 0;
+                    if (correctionsB !== correctionsA) {
+                        return correctionsB - correctionsA;
+                    }
+                    return (a.timestamp || 0) - (b.timestamp || 0);
+                });
+                const trimmed = entries.slice(0, MAX_LEADERBOARD);
+                persistLeaderboard(trimmed);
+                renderLeaderboard(trimmed);
+            }
+
+            function clearLeaderboard() {
+                persistLeaderboard([]);
+                renderLeaderboard([]);
+            }
+
+            difficultyButtons.forEach((button, index) => {
+                if (index === 0) {
+                    button.classList.add('selected');
+                }
+                button.addEventListener('click', () => {
+                    const chosen = button.dataset.difficulty;
+                    if (!chosen || !missions[chosen]) {
+                        return;
+                    }
+                    pendingDifficulty = chosen;
+                    difficultyButtons.forEach((btn) => btn.classList.toggle('selected', btn === button));
+                });
+            });
+
+            startButton.addEventListener('click', startMission);
+            playerNameInput.addEventListener('keydown', (event) => {
+                if (event.key === 'Enter') {
+                    startMission();
+                }
+            });
+            typeInput.addEventListener('keydown', handleKeydown);
+            typeInput.addEventListener('input', handleInput);
+            typeInput.addEventListener('paste', (event) => event.preventDefault());
+            restartButton.addEventListener('click', handleRestart);
+            debriefButton.addEventListener('click', handleRestart);
+            clearLeaderboardButton.addEventListener('click', () => {
+                clearLeaderboard();
+                logEvent('Resistance archive wiped clean.', 'neutral');
+            });
+            if (resetAchievementsButton) {
+                resetAchievementsButton.addEventListener('click', resetAchievements);
+            }
+            document.addEventListener('click', () => {
+                if (state.gameActive) {
+                    typeInput.focus();
+                }
+                unmuteSoundtrack();
+            });
+
+            document.addEventListener('keydown', () => {
+                unmuteSoundtrack();
+            }, { once: false });
+
+            loadAchievementState();
+            renderAchievements();
+            renderLeaderboard(loadLeaderboard());
+            updateStats();
+            updateTimer();
+            updateReserveDisplay();
+            playerNameInput.focus();
+
+            function renderParagraph(matchLength, mismatch) {
+                typedPortion.innerHTML = '';
+                remainingPortion.innerHTML = '';
+
+                const correctText = state.activeParagraph.slice(0, matchLength);
+                if (correctText) {
+                    const correctSpan = document.createElement('span');
+                    correctSpan.className = 'typed-correct';
+                    correctSpan.textContent = correctText;
+                    typedPortion.appendChild(correctSpan);
+                }
+
+                if (mismatch) {
+                    if (typeof mismatch.typedChar === 'string') {
+                        const typedSpan = document.createElement('span');
+                        typedSpan.className = 'typed-mismatch';
+                        typedSpan.textContent = mismatch.typedChar === '' ? '∎' : mismatch.typedChar;
+                        typedPortion.appendChild(typedSpan);
+                    }
+
+                    const expectedSpan = document.createElement('span');
+                    expectedSpan.className = 'expected-mismatch';
+                    const expectedChar = mismatch.expectedChar === null ? '∎' : mismatch.expectedChar;
+                    expectedSpan.textContent = expectedChar;
+                    remainingPortion.appendChild(expectedSpan);
+
+                    const restIndex = mismatch.expectedChar === null ? mismatch.index : mismatch.index + 1;
+                    const rest = state.activeParagraph.slice(restIndex);
+                    if (rest) {
+                        remainingPortion.appendChild(document.createTextNode(rest));
+                    }
+                } else {
+                    remainingPortion.textContent = state.activeParagraph.slice(matchLength);
+                }
+
+                if (!typedPortion.hasChildNodes()) {
+                    typedPortion.textContent = '';
+                }
+            }
+
+            function updateProgress(matchLength, totalLength) {
+                const percent = totalLength ? Math.min(100, (matchLength / totalLength) * 100) : 0;
+                progressFill.style.width = `${percent}%`;
+            }
+        })();
+    </script>
 </body>
 </html>
