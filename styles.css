@@ -219,6 +219,23 @@ main {
     margin-bottom: 1.1rem;
 }
 
+.round-banner {
+    font-size: 0.95rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(58, 52, 40, 0.85);
+    margin-bottom: 0.9rem;
+    font-weight: bold;
+}
+
+.round-banner.success {
+    color: #2e5d3b;
+}
+
+.round-banner.failure {
+    color: #7a1d18;
+}
+
 .target-line {
     font-size: 0.95rem;
     color: rgba(43, 41, 36, 0.7);
@@ -458,7 +475,8 @@ main {
     white-space: nowrap;
 }
 
-.leaderboard td:nth-child(2) {
+.leaderboard td:nth-child(2),
+.leaderboard td:nth-child(3) {
     white-space: normal;
 }
 
@@ -567,6 +585,51 @@ footer {
     outline: none;
     border-color: rgba(214, 190, 140, 0.75);
     box-shadow: 0 0 0 3px rgba(214, 190, 140, 0.28);
+}
+
+.difficulty-select {
+    display: grid;
+    gap: 0.65rem;
+    margin-bottom: 1.4rem;
+}
+
+@media (min-width: 520px) {
+    .difficulty-select {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.difficulty-option {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(216, 197, 147, 0.45);
+    background: rgba(13, 15, 18, 0.85);
+    color: #f6efd7;
+    font-size: 0.9rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.difficulty-option:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 24px rgba(0, 0, 0, 0.4);
+}
+
+.difficulty-option.selected {
+    background: linear-gradient(135deg, rgba(117, 138, 116, 0.95), rgba(74, 91, 77, 0.95));
+    border-color: rgba(175, 204, 165, 0.85);
+    box-shadow: 0 16px 28px rgba(0, 0, 0, 0.45);
+}
+
+.difficulty-option.selected:hover {
+    transform: translateY(-3px);
+}
+
+.difficulty-option:focus-visible {
+    outline: 3px solid rgba(214, 190, 140, 0.55);
+    outline-offset: 2px;
 }
 
 .visually-hidden {
