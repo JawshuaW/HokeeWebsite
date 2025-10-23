@@ -60,14 +60,6 @@
                     <span id="accuracy" class="status-value">100%</span>
                 </div>
                 <div class="status-block">
-                    <span class="status-label">Flawless Streak</span>
-                    <span id="streak" class="status-value">0 keys</span>
-                </div>
-                <div class="status-block">
-                    <span class="status-label">Best Streak</span>
-                    <span id="best-streak" class="status-value">0 keys</span>
-                </div>
-                <div class="status-block">
                     <span class="status-label">Mission Time</span>
                     <span id="mission-clock" class="status-value">00:00</span>
                 </div>
@@ -79,9 +71,6 @@
                         <div class="paper-header">Allied Dispatch • Berlin Sector</div>
                         <div class="target-line">Current transmission:</div>
                         <p id="paragraph-display" class="paragraph-display"><span id="typed-portion"></span><span id="remaining-portion"></span></p>
-                        <div class="paragraph-progress" aria-hidden="true">
-                            <div id="paragraph-progress-fill" class="paragraph-progress-fill"></div>
-                        </div>
                         <div class="hint-line">Remember: a single wrong letter counts as a strike.</div>
                     </div>
                     <div class="typewriter-platen"></div>
@@ -131,15 +120,6 @@
         <p>&copy; 1945 Allied Command. Survive the night.</p>
     </footer>
 
-    <iframe
-        id="battle-hymn"
-        class="soundtrack"
-        title="Battle ambience"
-        src="https://www.youtube.com/embed/h_FNt31NVLI?autoplay=1&loop=1&playlist=h_FNt31NVLI&controls=0&modestbranding=1&showinfo=0&rel=0&enablejsapi=1&mute=1"
-        allow="autoplay"
-        allowfullscreen>
-    </iframe>
-
     <div id="game-over" class="game-over" aria-hidden="true">
         <div class="game-over-content">
             <h2 id="game-over-title">Mission Failed</h2>
@@ -186,12 +166,9 @@
             const strikeTrack = document.getElementById('strike-track');
             const wpmDisplay = document.getElementById('wpm');
             const accuracyDisplay = document.getElementById('accuracy');
-            const streakDisplay = document.getElementById('streak');
-            const bestStreakDisplay = document.getElementById('best-streak');
             const missionClock = document.getElementById('mission-clock');
             const typedPortion = document.getElementById('typed-portion');
             const remainingPortion = document.getElementById('remaining-portion');
-            const progressFill = document.getElementById('paragraph-progress-fill');
             const announcement = document.getElementById('announcement');
             const logEntries = document.getElementById('log-entries');
             const typewriter = document.getElementById('typewriter');
@@ -211,7 +188,6 @@
             const finalTime = document.getElementById('final-time');
             const leaderboardBody = document.getElementById('leaderboard-body');
             const clearLeaderboardButton = document.getElementById('clear-leaderboard');
-            const soundtrackFrame = document.getElementById('battle-hymn');
 
             const MAX_LEADERBOARD = 10;
 
@@ -220,48 +196,14 @@
                 opponents: 50,
                 strikes: 0,
                 paragraphsDelivered: 0,
-                totalCorrectChars: 0,
-                mistakes: 0,
+                correctChars: 0,
+                totalChars: 0,
                 activeParagraph: '',
                 usedParagraphs: [],
                 startTime: null,
                 elapsedInterval: null,
-                gameActive: false,
-                errorIndex: null,
-                lockedValue: '',
-                currentStreak: 0,
-                longestStreak: 0,
-                lastMatchLength: 0
+                gameActive: false
             };
-
-            let soundtrackUnlocked = false;
-            function postToSoundtrack(message) {
-                if (!soundtrackFrame || !soundtrackFrame.contentWindow) {
-                    return;
-                }
-                soundtrackFrame.contentWindow.postMessage(JSON.stringify(message), '*');
-            }
-
-            function activateSoundtrack() {
-                if (!soundtrackFrame) {
-                    return;
-                }
-                postToSoundtrack({ event: 'command', func: 'playVideo', args: [] });
-            }
-
-            function unmuteSoundtrack() {
-                if (soundtrackUnlocked) {
-                    return;
-                }
-                soundtrackUnlocked = true;
-                postToSoundtrack({ event: 'command', func: 'unMute', args: [] });
-                postToSoundtrack({ event: 'command', func: 'setVolume', args: [100] });
-                postToSoundtrack({ event: 'command', func: 'playVideo', args: [] });
-            }
-
-            if (soundtrackFrame) {
-                soundtrackFrame.addEventListener('load', activateSoundtrack);
-            }
 
             function sampleParagraph() {
                 if (state.usedParagraphs.length === paragraphs.length) {
@@ -287,14 +229,13 @@
                     return 0;
                 }
                 const elapsedMinutes = Math.max((performance.now() - state.startTime) / 60000, 1 / 60);
-                const correct = typeof correctOverride === 'number' ? correctOverride : state.totalCorrectChars;
+                const correct = typeof correctOverride === 'number' ? correctOverride : state.correctChars;
                 return (correct / 5) / elapsedMinutes;
             }
 
-            function computeAccuracy(correctOverride, mistakeOverride) {
-                const correct = typeof correctOverride === 'number' ? correctOverride : state.totalCorrectChars;
-                const mistakes = typeof mistakeOverride === 'number' ? mistakeOverride : state.mistakes;
-                const total = correct + mistakes;
+            function computeAccuracy(correctOverride, totalOverride) {
+                const correct = typeof correctOverride === 'number' ? correctOverride : state.correctChars;
+                const total = typeof totalOverride === 'number' ? totalOverride : state.totalChars;
                 if (total === 0) {
                     return 100;
                 }
@@ -307,15 +248,13 @@
                 });
             }
 
-            function updateStats(currentMatchLength = state.lastMatchLength) {
-                const effectiveCorrect = state.totalCorrectChars + currentMatchLength;
-                const mistakes = state.mistakes;
+            function updateStats(liveCorrectDelta = 0, liveTotalDelta = 0) {
+                const effectiveCorrect = state.correctChars + liveCorrectDelta;
+                const effectiveTotal = state.totalChars + liveTotalDelta;
                 opponentsCount.textContent = state.opponents;
                 paragraphsCompleted.textContent = state.paragraphsDelivered;
                 wpmDisplay.textContent = `${computeWpm(effectiveCorrect).toFixed(1)} WPM`;
-                accuracyDisplay.textContent = `${computeAccuracy(effectiveCorrect, mistakes).toFixed(1)}%`;
-                streakDisplay.textContent = `${state.currentStreak} keys`;
-                bestStreakDisplay.textContent = `${state.longestStreak} keys`;
+                accuracyDisplay.textContent = `${computeAccuracy(effectiveCorrect, effectiveTotal).toFixed(1)}%`;
                 updateStrikeDisplay();
             }
 
@@ -334,10 +273,6 @@
                 typeInput.value = '';
                 typewriter.style.setProperty('--typed-length', 0);
                 typeInput.focus();
-                state.errorIndex = null;
-                state.lockedValue = '';
-                state.lastMatchLength = 0;
-                updateProgress(0, text.length);
             }
 
             function logEvent(message, variant = 'neutral') {
@@ -373,22 +308,24 @@
                 updateStats();
             }
 
-            function recordStrike(currentMatchLength = state.lastMatchLength) {
+            function recordStrike(matchedBeforeError = 0) {
                 state.strikes += 1;
-                state.mistakes += 1;
-                state.currentStreak = 0;
-                updateStats(currentMatchLength);
+                state.correctChars += matchedBeforeError;
+                state.totalChars += matchedBeforeError + 1;
+                updateStats();
                 resetTypewriterAnimation();
                 typewriter.classList.add('shake');
                 logEvent('Misfire! A wrong letter drew enemy fire.', 'danger');
                 if (state.strikes >= 3) {
                     endGame(false);
+                } else {
+                    setParagraph(sampleParagraph());
                 }
             }
 
             function registerVictory(charsTyped) {
-                state.totalCorrectChars += charsTyped;
-                state.lastMatchLength = 0;
+                state.correctChars += charsTyped;
+                state.totalChars += charsTyped;
                 eliminateOpponents();
             }
 
@@ -396,8 +333,8 @@
                 state.opponents = 50;
                 state.strikes = 0;
                 state.paragraphsDelivered = 0;
-                state.totalCorrectChars = 0;
-                state.mistakes = 0;
+                state.correctChars = 0;
+                state.totalChars = 0;
                 state.activeParagraph = '';
                 state.usedParagraphs = [];
                 state.startTime = null;
@@ -406,18 +343,12 @@
                     state.elapsedInterval = null;
                 }
                 state.gameActive = false;
-                state.errorIndex = null;
-                state.lockedValue = '';
-                state.currentStreak = 0;
-                state.longestStreak = 0;
-                state.lastMatchLength = 0;
                 missionClock.textContent = '00:00';
                 typedPortion.textContent = '';
                 remainingPortion.textContent = '';
                 announcement.textContent = '';
                 announcement.className = '';
                 logEntries.innerHTML = '';
-                updateProgress(0, 1);
                 updateStats();
                 updateTimer();
                 updateStrikeDisplay();
@@ -442,7 +373,6 @@
                 logEvent('Courier deployed into the Berlin ruins.', 'neutral');
                 updateStats();
                 updateTimer();
-                unmuteSoundtrack();
             }
 
             function endGame(victory) {
@@ -453,9 +383,8 @@
                     state.elapsedInterval = null;
                 }
                 const elapsed = state.startTime ? performance.now() - state.startTime : 0;
-                const totalCorrect = state.totalCorrectChars + state.lastMatchLength;
-                const wpm = computeWpm(totalCorrect);
-                const accuracy = computeAccuracy(totalCorrect, state.mistakes);
+                const wpm = computeWpm();
+                const accuracy = computeAccuracy();
                 const timeLabel = formatTime(elapsed);
                 finalWpm.textContent = wpm.toFixed(1);
                 finalAccuracy.textContent = `${accuracy.toFixed(1)}%`;
@@ -500,7 +429,7 @@
                     typeInput.value = '';
                     return;
                 }
-                let typed = typeInput.value;
+                const typed = typeInput.value;
                 const expected = state.activeParagraph;
                 if (!state.startTime) {
                     state.startTime = performance.now();
@@ -508,13 +437,6 @@
                         state.elapsedInterval = setInterval(updateTimer, 250);
                     }
                 }
-                if (state.errorIndex !== null) {
-                    if (typed.length > state.lockedValue.length && typed.startsWith(state.lockedValue)) {
-                        typeInput.value = state.lockedValue;
-                        typed = state.lockedValue;
-                    }
-                }
-
                 const matchLength = (() => {
                     const limit = Math.min(typed.length, expected.length);
                     for (let i = 0; i < limit; i++) {
@@ -525,60 +447,23 @@
                     return limit;
                 })();
 
-                const hasMismatch = typed.length > expected.length || matchLength < typed.length;
-
-                renderParagraph(matchLength, hasMismatch);
+                typedPortion.textContent = expected.slice(0, matchLength);
+                remainingPortion.textContent = expected.slice(matchLength);
                 typewriter.style.setProperty('--typed-length', matchLength);
-                updateProgress(matchLength, expected.length);
+                updateStats(matchLength, matchLength);
 
-                if (hasMismatch) {
-                    if (state.errorIndex === null) {
-                        state.errorIndex = matchLength;
-                        state.lockedValue = typed;
-                        recordStrike(matchLength);
-                        setAnnouncement('You mis-typed a letter! Backspace to correct before proceeding.', 'warning');
-                    } else {
-                        if (typed.length <= state.errorIndex && expected.startsWith(typed)) {
-                            state.errorIndex = null;
-                            state.lockedValue = typed;
-                            logEvent('Error corrected. Fingers steady.', 'success');
-                            setAnnouncement('Error cleared. Continue transmitting.', 'info');
-                        } else {
-                            state.lockedValue = typed;
-                        }
-                    }
-                    state.lastMatchLength = matchLength;
-                    updateStats(matchLength);
+                if (typed.length > expected.length) {
+                    recordStrike(matchLength);
                     return;
                 }
 
-                if (state.errorIndex !== null) {
-                    state.errorIndex = null;
-                    state.lockedValue = typed;
-                    logEvent('Error corrected. Fingers steady.', 'success');
-                    setAnnouncement('Error cleared. Continue transmitting.', 'info');
+                if (matchLength < typed.length) {
+                    recordStrike(matchLength);
+                    return;
                 }
-
-                const gained = matchLength - state.lastMatchLength;
-                if (gained > 0) {
-                    state.currentStreak += gained;
-                    if (state.currentStreak > state.longestStreak) {
-                        state.longestStreak = state.currentStreak;
-                    }
-                } else if (matchLength < state.lastMatchLength) {
-                    state.currentStreak = matchLength;
-                }
-                state.lastMatchLength = matchLength;
-
-                updateStats(matchLength);
-                state.lockedValue = typed;
 
                 if (typed === expected) {
                     registerVictory(expected.length);
-                    setAnnouncement('Transmission delivered! Hold for the next orders.', 'success');
-                    state.lockedValue = '';
-                    typewriter.classList.add('success');
-                    setTimeout(() => typewriter.classList.remove('success'), 400);
                 }
             }
 
@@ -674,40 +559,12 @@
                 if (state.gameActive) {
                     typeInput.focus();
                 }
-                unmuteSoundtrack();
             });
-
-            document.addEventListener('keydown', () => {
-                unmuteSoundtrack();
-            }, { once: false });
 
             renderLeaderboard(loadLeaderboard());
             updateStats();
             updateTimer();
             playerNameInput.focus();
-
-            function renderParagraph(matchLength, hasMismatch) {
-                typedPortion.textContent = state.activeParagraph.slice(0, matchLength);
-                remainingPortion.textContent = '';
-                if (hasMismatch) {
-                    const mismatchChar = state.activeParagraph[matchLength] ?? '∎';
-                    const mismatchSpan = document.createElement('span');
-                    mismatchSpan.className = 'mismatch';
-                    mismatchSpan.textContent = mismatchChar;
-                    remainingPortion.appendChild(mismatchSpan);
-                    const rest = state.activeParagraph.slice(matchLength + 1);
-                    if (rest) {
-                        remainingPortion.appendChild(document.createTextNode(rest));
-                    }
-                } else {
-                    remainingPortion.textContent = state.activeParagraph.slice(matchLength);
-                }
-            }
-
-            function updateProgress(matchLength, totalLength) {
-                const percent = totalLength ? Math.min(100, (matchLength / totalLength) * 100) : 0;
-                progressFill.style.width = `${percent}%`;
-            }
         })();
     </script>
 </body>
