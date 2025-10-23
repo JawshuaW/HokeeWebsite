@@ -160,6 +160,10 @@ main {
     transition: transform 0.2s ease;
 }
 
+.typewriter-body.success {
+    box-shadow: 0 32px 46px rgba(0, 0, 0, 0.6), 0 0 35px rgba(147, 201, 137, 0.45);
+}
+
 .typewriter-body::before {
     content: '';
     position: absolute;
@@ -226,15 +230,55 @@ main {
     line-height: 1.7;
     min-height: 120px;
     margin: 0 0 1.2rem;
+    white-space: pre-wrap;
+}
+
+.paragraph-display .expected-mismatch {
+    background: rgba(192, 70, 58, 0.25);
+    color: #972c26;
+    border-bottom: 2px solid rgba(151, 44, 38, 0.7);
+    padding: 0 0.15rem;
+    border-radius: 4px;
 }
 
 #typed-portion {
-    color: rgba(28, 44, 32, 0.95);
+    display: inline-block;
+    min-width: 1px;
+    padding: 0 0.15rem 0 0;
     background: linear-gradient(90deg, rgba(188, 219, 178, 0.6), rgba(188, 219, 178, 0.2));
+}
+
+#typed-portion .typed-correct {
+    color: rgba(28, 44, 32, 0.95);
+}
+
+#typed-portion .typed-mismatch {
+    color: #651c18;
+    background: rgba(192, 70, 58, 0.35);
+    border-bottom: 2px solid rgba(151, 44, 38, 0.7);
+    padding: 0 0.15rem;
+    border-radius: 4px;
 }
 
 #remaining-portion {
     color: rgba(24, 22, 20, 0.9);
+}
+
+.paragraph-progress {
+    width: 100%;
+    height: 6px;
+    background: rgba(28, 30, 32, 0.1);
+    border-radius: 4px;
+    margin: 0.75rem 0 1rem;
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.paragraph-progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, rgba(133, 161, 122, 0.9), rgba(188, 219, 178, 0.8));
+    transition: width 0.2s ease;
 }
 
 .hint-line {
@@ -314,6 +358,10 @@ main {
     color: #b8dfad;
 }
 
+#announcement.warning {
+    color: #f7c27d;
+}
+
 #announcement.defeat {
     color: #ffb0a6;
 }
@@ -369,12 +417,13 @@ main {
 
 .leaderboard {
     margin: 0 auto 2.5rem;
-    max-width: 780px;
+    max-width: 920px;
     background: rgba(16, 19, 24, 0.78);
     border-radius: 20px;
     border: 1px solid rgba(216, 197, 147, 0.25);
     padding: 1.8rem;
     box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.35);
+    overflow-x: auto;
 }
 
 .leaderboard-header {
@@ -403,8 +452,14 @@ main {
 
 .leaderboard th,
 .leaderboard td {
-    padding: 0.85rem 1rem;
+    padding: 0.7rem 0.85rem;
     text-align: left;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.leaderboard td:nth-child(2) {
+    white-space: normal;
 }
 
 .leaderboard thead {
@@ -608,6 +663,18 @@ footer {
 .game-over.fatal.visible .game-over-flash {
     opacity: 1;
     animation: muzzle 0.35s ease;
+}
+
+.soundtrack {
+    position: fixed;
+    width: 1px;
+    height: 1px;
+    border: 0;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
 }
 
 @keyframes drip {
